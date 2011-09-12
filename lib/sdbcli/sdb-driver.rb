@@ -25,7 +25,7 @@ module SimpleDB
     def show_domains
       domains = []
 
-      iterate(:list_domains, :NextToken => 100) do |doc|
+      iterate(:list_domains) do |doc|
         doc.get_elements('//DomainName').each do |i|
           domains << i.text
         end
@@ -70,24 +70,21 @@ module SimpleDB
     def get(domain_name, item_name, attr_names = [], consistent = false)
       params = {:ConsistentRead => consistent}
       attr_names.each_with_index {|name, i| params["AttributeName.#{i}"] = name }
-
       doc = @client.get_attributes(domain_name, item_name, params)
-      row = {}
+      attrs_to_hash(doc)
+    end
 
-      doc.get_elements('//Attribute').map do |i|
-        name = i.get_text('Name').to_s
-        value = i.get_text('Value').to_s
+    def select(expr, consistent = false)
+      params = {:SelectExpression => expr, :ConsistentRead => consistent}
+      items = []
 
-        if row[name].kind_of?(Array)
-          row[name] << value
-        elsif row.has_key?(name)
-          row[name] = [row[name], value]
-        else
-          row[name] = value
+      iterate(:select, params) do |doc|
+        doc.get_elements('//Item').map do |i|
+          items << [i.get_text('Name').to_s, attrs_to_hash(doc)]
         end
       end
 
-      return row
+      return items
     end
 
     def delete(domain_name, item_name, attrs = [], consistent = false)
@@ -109,6 +106,25 @@ module SimpleDB
 
     private
 
+    def attrs_to_hash(doc)
+      h = {}
+
+      doc.get_elements('//Attribute').map do |i|
+        name = i.get_text('Name').to_s
+        value = i.get_text('Value').to_s
+
+        if h[name].kind_of?(Array)
+          h[name] << value
+        elsif h.has_key?(name)
+          h[name] = [h[name], value]
+        else
+          h[name] = value
+        end
+      end
+
+      return h
+    end
+
     def iterate(method, params = {})
       Iterator.new(@client, method, params).each do |doc|
         yield(doc)
@@ -125,10 +141,10 @@ module SimpleDB
 
       def each
         while @token
-          @params.update(:NextToken => @token) if @token != :first
+          @params.update(:NextToken => @token.to_s) if @token != :first
           doc = @client.send(@method, @params)
           yield(doc)
-          @token = doc.get_text('//NextToken').to_s
+          @token = doc.get_text('//NextToken')
         end
       end
     end # Iterator

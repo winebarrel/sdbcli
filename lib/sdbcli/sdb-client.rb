@@ -48,6 +48,10 @@ module SimpleDB
       query('GetAttributes', params)
     end
 
+    def select(params = {})
+      query('Select', params)
+    end
+
     def delete_attributes(domain_name, item_name, params = {})
       params = params.merge(:DomainName => domain_name, :ItemName => item_name)
       query('DeleteAttributes', params)
@@ -91,7 +95,7 @@ module SimpleDB
 
     private
     def aws_sign(params)
-      params = params.sort_by {|a, b| a.to_s }.map {|k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join('&')
+      params = params.sort_by {|a, b| a.to_s }.map {|k, v| "#{escape(k)}=#{escape(v)}" }.join('&')
       string_to_sign = "POST\n#{@endpoint}\n/\n#{params}"
       digest = OpenSSL::HMAC.digest(OpenSSL::Digest.const_get(@algorithm).new, @secretAccessKey, string_to_sign)
       Base64.encode64(digest).gsub("\n", '')
@@ -103,6 +107,10 @@ module SimpleDB
         message = error.get_text('Message').to_s
         raise Error, "#{code}: #{message}"
       end
+    end
+
+    def escape(str)
+      CGI.escape(str.to_s).gsub('+', '%20')
     end
   end # Client
 end # SimpleDB
