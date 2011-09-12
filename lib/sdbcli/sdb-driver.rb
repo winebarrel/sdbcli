@@ -16,6 +16,8 @@ module SimpleDB
       @client.endpoint = v
     end
 
+    # domain action
+
     def create_domain(domain_name)
       @client.create_domain(domain_name)
     end
@@ -36,7 +38,34 @@ module SimpleDB
       @client.delete_domain(domain_name)
     end
 
+    # attr action
+
+    def get(domain_name, item_name, attr_name = [], consistent = false)
+      params = {}
+      attr_name.each_with_index {|name, i| params["AttributeName.#{i}"] = name }
+      params[:ConsistentRead] = consistent
+
+      doc = @client.get_attributes(domain_name, item_name, params)
+      row = {}
+
+      doc.get_elements('//Attribute').map do |i|
+        name = i.get_text('Name').to_s
+        value = i.get_text('Value').to_s
+
+        if row[name].kind_of?(Array)
+          row[name] << value
+        elsif row.has_key?(name)
+          row[name] = [row[name], value]
+        else
+          row[name] = value
+        end
+      end
+
+      return row
+    end
+
     private
+
     def iterate(method, params = {})
       Iterator.new(@client, method, params).each do |doc|
         yield(doc)
@@ -56,7 +85,7 @@ module SimpleDB
           @params.update(:NextToken => @token) if @token != :first
           doc = @client.send(@method, @params)
           yield(doc)
-          @token = doc.get_text('//NextToken')
+          @token = doc.get_text('//NextToken').to_s
         end
       end
     end # Iterator

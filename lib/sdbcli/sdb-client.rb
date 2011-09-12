@@ -38,7 +38,13 @@ module SimpleDB
 
     # attr action
 
+    def get_attributes(domain_name, item_name, params = {})
+      params = params.merge(:DomainName => domain_name, :ItemName => item_name)
+      query('GetAttributes', params)
+    end
+
     private
+
     def query(action, params = {})
       params = {
         :Action           => action,
@@ -83,8 +89,8 @@ module SimpleDB
 
     def validate(doc)
       if (error = doc.elements['//Errors/Error'])
-        code = error.get_text('//Code')
-        message = error.get_text('//Message')
+        code = error.get_text('Code').to_s
+        message = error.get_text('Message').to_s
         raise Error, "#{code}: #{message}"
       end
     end
