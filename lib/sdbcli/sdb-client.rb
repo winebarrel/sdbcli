@@ -38,6 +38,11 @@ module SimpleDB
 
     # attr action
 
+    def put_attributes(domain_name, item_name, params = {})
+      params = params.merge(:DomainName => domain_name, :ItemName => item_name)
+      query('PutAttributes', params)
+    end
+
     def get_attributes(domain_name, item_name, params = {})
       params = params.merge(:DomainName => domain_name, :ItemName => item_name)
       query('GetAttributes', params)

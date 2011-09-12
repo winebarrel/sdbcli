@@ -40,10 +40,32 @@ module SimpleDB
 
     # attr action
 
-    def get(domain_name, item_name, attr_name = [], consistent = false)
-      params = {}
-      attr_name.each_with_index {|name, i| params["AttributeName.#{i}"] = name }
-      params[:ConsistentRead] = consistent
+    def insert(domain_name, item_name, attrs = {}, consistent = false)
+      insert_or_update0(domain_name, item_name, attrs, consistent, false)
+    end
+
+    def update(domain_name, item_name, attrs = {}, consistent = false)
+      insert_or_update0(domain_name, item_name, attrs, consistent, true)
+    end
+
+    def insert_or_update0(domain_name, item_name, attrs, consistent, replace)
+      params = {:ConsistentRead => consistent}
+
+      attrs.each_with_index do |attr, i|
+        name, value = attr
+        i += 1
+        params["Attribute.#{i}.Name"] = name
+        params["Attribute.#{i}.Value"] = value
+        params["Attribute.#{i}.Replace"] = replace
+      end
+
+      doc = @client.put_attributes(domain_name, item_name, params)
+    end
+    private :insert_or_update0
+
+    def get(domain_name, item_name, attr_names = [], consistent = false)
+      params = {:ConsistentRead => consistent}
+      attr_names.each_with_index {|name, i| params["AttributeName.#{i}"] = name }
 
       doc = @client.get_attributes(domain_name, item_name, params)
       row = {}
