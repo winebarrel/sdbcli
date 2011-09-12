@@ -42,31 +42,41 @@ module SimpleDB
     # attr action
 
     def insert(domain_name, item_name, attrs = {}, consistent = false)
-      insert_or_update0(domain_name, item_name, attrs, consistent, false)
-    end
-
-    def update(domain_name, item_name, attrs = {}, consistent = false)
-      insert_or_update0(domain_name, item_name, attrs, consistent, true)
-    end
-
-    def insert_or_update0(domain_name, item_name, attrs, consistent, replace)
       params = {:ConsistentRead => consistent}
       i = 0
 
-      attrs.each do |attr|
-        name, values = attr
-
+      attrs.each do |name, values|
         [values].flatten.each do |v|
           i += 1
           params["Attribute.#{i}.Name"] = name
           params["Attribute.#{i}.Value"] = v
-          params["Attribute.#{i}.Replace"] = replace
+          params["Attribute.#{i}.Replace"] = false
         end
       end
 
       doc = @client.put_attributes(domain_name, item_name, params)
     end
-    private :insert_or_update0
+
+    def update(domain_name, items = {}, consistent = false)
+      params = {:ConsistentRead => consistent}
+      i = j = 0
+
+      items.each do |item_name, attrs|
+        i += 1
+        params["Item.#{i}.ItemName"] = item_name
+
+        attrs.each do |attr_name, values|
+          [values].flatten.each do |v|
+            j += 1
+            params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
+            params["Item.#{i}.Attribute.#{j}.Value"] = v
+            params["Item.#{i}.Attribute.#{j}.Replace"] = false
+          end
+        end
+      end
+
+      doc = @client.batch_put_attributes(domain_name, params)
+    end
 
     def get(domain_name, item_name, attr_names = [], consistent = false)
       params = {:ConsistentRead => consistent}
@@ -92,9 +102,7 @@ module SimpleDB
       params = {:ConsistentRead => consistent}
       i = 0
 
-      attrs.each do |attr|
-        name, values = attr
-
+      attrs.each do |name, values|
         [values].flatten.each do |v|
           i += 1
           params["Attribute.#{i}.Name"] = name
