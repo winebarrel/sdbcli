@@ -32,6 +32,10 @@ module SimpleDB
       return domains
     end
 
+    def drop_domain(domain_name)
+      @client.delete_domain(:DomainName => domain_name)
+    end
+
     private
     def iterate(method, params = {})
       Iterator.new(@client, method, params).each do |doc|

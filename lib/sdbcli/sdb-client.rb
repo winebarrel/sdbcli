@@ -28,6 +28,10 @@ module SimpleDB
       query('ListDomains', params)
     end
 
+    def delete_domain(params = {})
+      query('DeleteDomain', params)
+    end
+
     def query(action, params = {})
       params = {
         :Action           => action,
