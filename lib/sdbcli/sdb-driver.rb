@@ -1,4 +1,5 @@
 require 'sdbcli/sdb-client'
+require 'sdbcli/sdb-resultset'
 
 module SimpleDB
   class Error < StandardError; end
@@ -84,7 +85,7 @@ module SimpleDB
         end
       end
 
-      return items
+      ResultSet.new(items)
     end
 
     def delete(domain_name, item_name, attrs = [], consistent = false)
