@@ -20,7 +20,8 @@ module SimpleDB
       @algorithm = algorithm
     end
 
-    def create_domain(params = {})
+    def create_domain(domain_name, params = {})
+      params = params.merge(:DomainName => domain_name)
       query('CreateDomain', params)
     end
 
@@ -28,7 +29,8 @@ module SimpleDB
       query('ListDomains', params)
     end
 
-    def delete_domain(params = {})
+    def delete_domain(domain_name, params = {})
+      params = params.merge(:DomainName => domain_name)
       query('DeleteDomain', params)
     end
 

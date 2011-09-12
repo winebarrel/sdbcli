@@ -17,7 +17,7 @@ module SimpleDB
     end
 
     def create_domain(domain_name)
-      @client.create_domain(:DomainName => domain_name)
+      @client.create_domain(domain_name)
     end
 
     def show_domains
@@ -33,7 +33,7 @@ module SimpleDB
     end
 
     def drop_domain(domain_name)
-      @client.delete_domain(:DomainName => domain_name)
+      @client.delete_domain(domain_name)
     end
 
     private
