@@ -48,6 +48,11 @@ module SimpleDB
       query('GetAttributes', params)
     end
 
+    def delete_attributes(domain_name, item_name, params = {})
+      params = params.merge(:DomainName => domain_name, :ItemName => item_name)
+      query('DeleteAttributes', params)
+    end
+
     private
 
     def query(action, params = {})

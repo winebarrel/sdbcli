@@ -50,13 +50,17 @@ module SimpleDB
 
     def insert_or_update0(domain_name, item_name, attrs, consistent, replace)
       params = {:ConsistentRead => consistent}
+      i = 0
 
-      attrs.each_with_index do |attr, i|
-        name, value = attr
-        i += 1
-        params["Attribute.#{i}.Name"] = name
-        params["Attribute.#{i}.Value"] = value
-        params["Attribute.#{i}.Replace"] = replace
+      attrs.each do |attr|
+        name, values = attr
+
+        [values].flatten.each do |v|
+          i += 1
+          params["Attribute.#{i}.Name"] = name
+          params["Attribute.#{i}.Value"] = v
+          params["Attribute.#{i}.Replace"] = replace
+        end
       end
 
       doc = @client.put_attributes(domain_name, item_name, params)
@@ -84,6 +88,23 @@ module SimpleDB
       end
 
       return row
+    end
+
+    def delete(domain_name, item_name, attrs = [], consistent = false)
+      params = {:ConsistentRead => consistent}
+      i = 0
+
+      attrs.each do |attr|
+        name, values = attr
+
+        [values].flatten.each do |v|
+          i += 1
+          params["Attribute.#{i}.Name"] = name
+          params["Attribute.#{i}.Value"] = v if v
+        end
+      end
+
+      doc = @client.delete_attributes(domain_name, item_name, params)
     end
 
     private
