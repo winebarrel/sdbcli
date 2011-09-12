@@ -3,7 +3,7 @@ require 'sdbcli/sdb-client'
 module SimpleDB
   class Error < StandardError; end
 
-  class Shell
+  class Driver
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com', algorithm = :SHA256)
       @client = Client.new(accessKeyId, secretAccessKey, endpoint, algorithm)
     end
@@ -60,5 +60,5 @@ module SimpleDB
         end
       end
     end # Iterator
-  end # Shell
+  end # Driver
 end # SimpleDB
