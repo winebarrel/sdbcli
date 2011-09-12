@@ -16,12 +16,14 @@ module SimpleDB
       @client.endpoint = v
     end
 
+    def create_domain(domain_name)
+      @client.create_domain(:DomainName => domain_name)
+    end
+
     def show_domains
       domains = []
 
       iterate(:list_domains, :NextToken => 100) do |doc|
-        validate(doc)
-
         doc.get_elements('//DomainName').each do |i|
           domains << i.text
         end
@@ -31,14 +33,6 @@ module SimpleDB
     end
 
     private
-    def validate(doc)
-      if (error = doc.elements['//Errors/Error'])
-        code = error.get_text('//Code')
-        message = error.get_text('//Message')
-        raise Error, "#{code}: #{message}"
-      end
-    end
-
     def iterate(method, params = {})
       Iterator.new(@client, method, params).each do |doc|
         yield(doc)
