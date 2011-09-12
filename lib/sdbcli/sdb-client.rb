@@ -2,6 +2,7 @@ require 'cgi'
 require 'base64'
 require 'net/https'
 require 'openssl'
+require 'rexml/document'
 
 module SimpleDB
   class Client
@@ -15,6 +16,10 @@ module SimpleDB
       @secretAccessKey = secretAccessKey
       @endpoint = endpoint
       @algorithm = algorithm
+    end
+
+    def list_domains(params = {})
+      query('ListDomains', params)
     end
 
     def query(action, params = {})
@@ -44,7 +49,7 @@ module SimpleDB
         req.set_form_data(params)
         res = w.request(req)
 
-        res.body
+        REXML::Document.new(res.body)
       end
     end
 
