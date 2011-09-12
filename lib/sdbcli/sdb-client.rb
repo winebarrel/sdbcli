@@ -64,6 +64,11 @@ module SimpleDB
       query('BatchPutAttributes', params)
     end
 
+    def batch_delete_attributes(domain_name, params = {})
+      params = params.merge(:DomainName => domain_name)
+      query('BatchDeleteAttributes', params)
+    end
+
     private
 
     def query(action, params = {})

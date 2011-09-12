@@ -65,12 +65,12 @@ module SimpleDB
         i += 1
         params["Item.#{i}.ItemName"] = item_name
 
-        attrs.each do |attr_name, values|
+        (attrs || {}).each do |attr_name, values|
           [values].flatten.each do |v|
             j += 1
             params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
             params["Item.#{i}.Attribute.#{j}.Value"] = v
-            params["Item.#{i}.Attribute.#{j}.Replace"] = false
+            params["Item.#{i}.Attribute.#{j}.Replace"] = true
           end
         end
       end
@@ -98,19 +98,24 @@ module SimpleDB
       ResultSet.new(items)
     end
 
-    def delete(domain_name, item_name, attrs = [], consistent = false)
+    def delete(domain_name, items = {}, consistent = false)
       params = {:ConsistentRead => consistent}
-      i = 0
+      i = j = 0
 
-      attrs.each do |name, values|
-        [values].flatten.each do |v|
-          i += 1
-          params["Attribute.#{i}.Name"] = name
-          params["Attribute.#{i}.Value"] = v if v
+      items.each do |item_name, attrs|
+        i += 1
+        params["Item.#{i}.ItemName"] = item_name
+
+        (attrs || []).each do |attr_name, values|
+          [values].flatten.each do |v|
+            j += 1
+            params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
+            params["Item.#{i}.Attribute.#{j}.Value"] = v if v
+          end
         end
       end
 
-      doc = @client.delete_attributes(domain_name, item_name, params)
+      doc = @client.batch_delete_attributes(domain_name, params)
     end
 
     private
