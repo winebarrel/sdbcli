@@ -27,8 +27,8 @@ module SimpleDB
       domains = []
 
       iterate(:list_domains) do |doc|
-        doc.get_elements('//DomainName').each do |i|
-          domains << i.text
+        doc.css('DomainName').each do |i|
+          domains << i.content
         end
       end
 
@@ -54,7 +54,7 @@ module SimpleDB
         end
       end
 
-      doc = @client.put_attributes(domain_name, item_name, params)
+      @client.put_attributes(domain_name, item_name, params)
     end
 
     def update(domain_name, items = {}, consistent = false)
@@ -75,7 +75,7 @@ module SimpleDB
         end
       end
 
-      doc = @client.batch_put_attributes(domain_name, params)
+      @client.batch_put_attributes(domain_name, params)
     end
 
     def get(domain_name, item_name, attr_names = [], consistent = false)
@@ -115,7 +115,7 @@ module SimpleDB
         end
       end
 
-      doc = @client.batch_delete_attributes(domain_name, params)
+      @client.batch_delete_attributes(domain_name, params)
     end
 
     private
