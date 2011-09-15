@@ -90,8 +90,8 @@ module SimpleDB
       items = []
 
       iterate(:select, params) do |doc|
-        doc.get_elements('//Item').map do |i|
-          items << [i.get_text('Name').to_s, attrs_to_hash(doc)]
+        doc.css('Item').map do |i|
+          items << [i.at_css('Name').content, attrs_to_hash(i)]
         end
       end
 
@@ -120,12 +120,12 @@ module SimpleDB
 
     private
 
-    def attrs_to_hash(doc)
+    def attrs_to_hash(node)
       h = {}
 
-      doc.get_elements('//Attribute').map do |i|
-        name = i.get_text('Name').to_s
-        value = i.get_text('Value').to_s
+      node.css('Attribute').map do |i|
+        name = i.at_css('Name').content
+        value = i.at_css('Value').content
 
         if h[name].kind_of?(Array)
           h[name] << value
@@ -155,10 +155,10 @@ module SimpleDB
 
       def each
         while @token
-          @params.update(:NextToken => @token.to_s) if @token != :first
+          @params.update(:NextToken => @token.content) if @token != :first
           doc = @client.send(@method, @params)
           yield(doc)
-          @token = doc.get_text('//NextToken')
+          @token = doc.at_css('NextToken')
         end
       end
     end # Iterator
