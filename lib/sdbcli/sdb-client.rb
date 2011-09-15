@@ -2,7 +2,7 @@ require 'cgi'
 require 'base64'
 require 'net/https'
 require 'openssl'
-require 'rexml/document'
+require 'nokogiri'
 
 module SimpleDB
   class Error < StandardError; end
@@ -98,7 +98,7 @@ module SimpleDB
         req.set_form_data(params)
         res = w.request(req)
 
-        REXML::Document.new(res.body)
+        Nokogiri::XML(res.body)
       end
 
       validate(doc)
@@ -114,9 +114,9 @@ module SimpleDB
     end
 
     def validate(doc)
-      if (error = doc.elements['//Errors/Error'])
-        code = error.get_text('Code').to_s
-        message = error.get_text('Message').to_s
+      if (error = doc.at_css('Errors Error'))
+        code = error.at_css('Code').content
+        message = error.at_css('Message').content
         raise Error, "#{code}: #{message}"
       end
     end
