@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+$LOAD_PATH << File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
+
+require 'rubygems'
+require 'sdbcli'
+
+require 'optparse'
+require 'readline'
+require 'yaml'
+
+access_key_id     = ENV['AWS_ACCESS_KEY_ID']
+secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
+sdb_endpoint      = ENV['SDB_ENDPOINT'] || 'sdb.amazonaws.com'
+
+ARGV.options do |opt|
+  opt.on('-k', '--access-key-id=AWS_ACCESS_KEY_ID') {|v| access_key_id = v }
+  opt.on('-s', '--secret-access-key=AWS_SECRET_ACCESS_KEY') {|v| secret_access_key = v }
+  opt.on('-e', '--endpoint=SDB_ENDPOINT') {|v| sdb_endpoint = v }
+  opt.parse!
+
+  unless access_key_id and secret_access_key and sdb_endpoint
+    puts opt.help
+    exit 1
+  end
+end
+
+$runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
+
+def execute(query)
+  out = $runner.execute(query)
+  puts YAML.dump(out) if out
+end
+
+if $stdin.tty?
+  execute($stdin.read)
+  exit 0
+end
+
+if sdb_endpoint =~ /sdb\.([^.]+)\.amazonaws\.com/
+  region = $1
+else
+  region = 'us-east-1'
+end
+
+def help
+  <<-EOS
+commands:
+  show domains
+  create domain domain_name
+  drop domain domain_name
+  get [output_list] from domain_name where itemname = '...'
+  insert into domain_name (itemname, attr1, attr2, ...) values ('name', 'val1', 'val2', ...)
+  update domain_name set attr1 = 'val1', attr2 = 'val2', ... where itemname = '...'
+  delete [attr1, attr2, ...] from domain_name itemname = '...'
+  select output_list from domain_name [where expression] [sort_instructions] [limit limit]
+    EOS
+end
+
+while buf = Readline.readline("#{region}> ", true)
+  begin
+    case buf.downcase
+    when 'help'
+      puts help
+    when 'exit', 'quit'
+      exit
+    else
+      execute(buf.sub(/;\Z/, ''))
+    end
+  rescue => e
+    puts e.message
+  end
+end
