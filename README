@@ -1,0 +1,53 @@
+= sdbcli
+
+== Description
+
+sdbcli is command line client of Amazon SimpleDB.
+
+== Source Code
+
+https://github.com/cookpad/murakumo
+
+== Dependency
+
+* RubyDNS
+* SQLite
+
+== Install
+
+  shell> gem install sdbcli
+  shell> export AWS_ACCESS_KEY_ID='...'
+  shell> export AWS_SECRET_ACCESS_KEY='...'
+  shell> export SDB_ENDPOINT='sdb.ap-northeast-1.amazonaws.com'
+  shell> sdbcli
+
+== Example
+
+  ap-northeast-1> help
+  commands:
+    show domains
+    create domain domain_name
+    drop domain domain_name
+    get [output_list] from domain_name where itemname = '...'
+    insert into domain_name (itemname, attr1, attr2, ...) values ('name', 'val1', 'val2', ...)
+    update domain_name set attr1 = 'val1', attr2 = 'val2', ... where itemname = '...'
+    delete [attr1, attr2, ...] from domain_name itemname = '...'
+    select output_list from domain_name [where expression] [sort_instructions] [limit limit]
+  ap-northeast-1> select * from test
+  ---
+  - - itemname1
+    - attr1: val1
+      attr2: val2
+  - - itemname2
+    - attr1: val1
+      attr2: val2
+
+  shell> echo 'select * from test' | sdbcli
+  ---
+  - - itemname1
+    - attr1: val1
+      attr2: val2
+  - - itemname2
+    - attr1: val1
+      attr2: val2
+
