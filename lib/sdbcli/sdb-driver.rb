@@ -5,8 +5,8 @@ module SimpleDB
   class Error < StandardError; end
 
   class Driver
-    def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com', algorithm = :SHA256)
-      @client = Client.new(accessKeyId, secretAccessKey, endpoint, algorithm)
+    def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
+      @client = Client.new(accessKeyId, secretAccessKey, endpoint)
     end
 
     def endpoint
