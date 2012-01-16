@@ -6,7 +6,7 @@ sdbcli is command line client of Amazon SimpleDB.
 
 == Source Code
 
-https://github.com/cookpad/murakumo
+https://bitbucket.org/winebarrel/sdbcli
 
 == Dependency
 
