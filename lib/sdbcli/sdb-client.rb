@@ -10,14 +10,14 @@ module SimpleDB
   class Client
     API_VERSION = '2009-04-15'
     SIGNATURE_VERSION = 2
+    SIGNATURE_ALGORITHM = :SHA256
 
     attr_accessor :endpoint
 
-    def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com', algorithm = :SHA256)
+    def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
       @accessKeyId = accessKeyId
       @secretAccessKey = secretAccessKey
       @endpoint = endpoint
-      @algorithm = algorithm
     end
 
     # domain action
@@ -77,7 +77,7 @@ module SimpleDB
         :Version          => API_VERSION,
         :Timestamp        => Time.now.getutc.strftime('%Y-%m-%dT%H:%M:%SZ'),
         :SignatureVersion => SIGNATURE_VERSION,
-        :SignatureMethod  => "Hmac#{@algorithm}",
+        :SignatureMethod  => "Hmac#{SIGNATURE_ALGORITHM}",
         :AWSAccessKeyId   => @accessKeyId,
       }.merge(params)
 
@@ -109,7 +109,7 @@ module SimpleDB
     def aws_sign(params)
       params = params.sort_by {|a, b| a.to_s }.map {|k, v| "#{escape(k)}=#{escape(v)}" }.join('&')
       string_to_sign = "POST\n#{@endpoint}\n/\n#{params}"
-      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.const_get(@algorithm).new, @secretAccessKey, string_to_sign)
+      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.const_get(SIGNATURE_ALGORITHM).new, @secretAccessKey, string_to_sign)
       Base64.encode64(digest).gsub("\n", '')
     end
 
