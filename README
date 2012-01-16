@@ -8,11 +8,6 @@ sdbcli is command line client of Amazon SimpleDB.
 
 https://bitbucket.org/winebarrel/sdbcli
 
-== Dependency
-
-* RubyDNS
-* SQLite
-
 == Install
 
   shell> gem install sdbcli
