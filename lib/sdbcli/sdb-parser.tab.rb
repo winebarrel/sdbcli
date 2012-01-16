@@ -15,7 +15,7 @@ module SimpleDB
 
 class Parser < Racc::Parser
 
-module_eval <<'..end sdb-parser.y modeval..id713ebf5d80', 'sdb-parser.y', 119
+module_eval <<'..end sdb-parser.y modeval..idc908e49d79', 'sdb-parser.y', 119
 
 KEYWORDS = %w(
   AND
@@ -117,7 +117,7 @@ def self.parse(obj)
   self.new(obj).parse
 end
 
-..end sdb-parser.y modeval..id713ebf5d80
+..end sdb-parser.y modeval..idc908e49d79
 
 ##### racc 1.4.5 generates ###
 
