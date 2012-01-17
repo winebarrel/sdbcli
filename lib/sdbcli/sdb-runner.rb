@@ -17,14 +17,18 @@ module SimpleDB
       @driver.endpoint = v
     end
 
-    def execute(query)
+    def execute(query, inline = true)
       parsed = Parser.parse(query)
       command = parsed.class.name.split('::').last.to_sym
 
       case command
       when :GET
         item = @driver.get(parsed.domain, parsed.item_name, parsed.attr_names)
-        def item.to_yaml_style; :inline; end
+
+        if inline
+          def item.to_yaml_style; :inline; end
+        end
+
         item
       when :INSERT
         @driver.insert(parsed.domain, parsed.item_name, parsed.attrs)
@@ -38,8 +42,10 @@ module SimpleDB
       when :SELECT
         items = @driver.select(parsed.query)
 
-        items.each do |item|
-          def item.to_yaml_style; :inline; end
+        if inline
+          items.each do |item|
+            def item.to_yaml_style; :inline; end
+          end
         end
 
         items
