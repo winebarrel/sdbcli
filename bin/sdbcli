@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
 
-Version = '0.1.8'
+Version = '0.1.9'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 
 require 'rubygems'
@@ -108,7 +108,10 @@ at_exit do
 end
 
 while buf = Readline.readline("#{region}> ", true)
-  Readline::HISTORY.pop if /\A\s*\Z/ =~ buf
+  if /\A\s*\Z/ =~ buf
+    Readline::HISTORY.pop
+    next
+  end
 
   begin
     case buf.downcase
