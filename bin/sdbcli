@@ -51,8 +51,7 @@ unless $stdin.tty?
   queries = $stdin.read
 
   queries.split(';').each do |query|
-    query = query.strip
-    next if query.empty?
+    next if /\A\s*\Z/ =~ query
     execute(query)
   end
 
@@ -101,7 +100,7 @@ at_exit do
   unless Readline::HISTORY.empty?
     open(HISTORY_FILE, 'a') do |f|
       Readline::HISTORY.each do |line|
-        line = line.strip
+        next if /\A\s*\Z/ =~ line
         f.puts line
       end
     end
