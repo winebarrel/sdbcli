@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
+
 Version = '0.1.6'
+HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 
 require 'rubygems'
 require 'sdbcli'
@@ -85,7 +87,29 @@ SELECT output_list FROM domain_name [where expression] [sort_instructions] [limi
     EOS
 end
 
+if File.exist?(HISTORY_FILE)
+  open(HISTORY_FILE) do |f|
+    f.each_line do |line|
+      line = line.strip
+      Readline::HISTORY.push(line) unless line.empty?
+    end
+  end
+end
+
+at_exit do
+  unless Readline::HISTORY.empty?
+    open(HISTORY_FILE, 'a') do |f|
+      Readline::HISTORY.each do |line|
+        line = line.strip
+        f.puts line
+      end
+    end
+  end
+end
+
 while buf = Readline.readline("#{region}> ", true)
+  Readline::HISTORY.pop if /\A\s*\Z/ =~ buf
+
   begin
     case buf.downcase
     when 'help'

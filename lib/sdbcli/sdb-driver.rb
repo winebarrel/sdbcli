@@ -4,6 +4,8 @@ module SimpleDB
   class Error < StandardError; end
 
   class Driver
+    attr_accessor :iteratable
+
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
       @client = Client.new(accessKeyId, secretAccessKey, endpoint)
     end
@@ -157,7 +159,12 @@ module SimpleDB
           @params.update(:NextToken => @token.content) if @token != :first
           doc = @client.send(@method, @params)
           yield(doc)
-          @token = doc.at_css('NextToken')
+
+          if @iteratable
+            @token = doc.at_css('NextToken')
+          else
+            @token = nil
+          end
         end
       end
     end # Iterator
