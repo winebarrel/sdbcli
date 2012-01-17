@@ -44,8 +44,6 @@ end
 
 def help
   <<-EOS
-command list
---------------
 SHOW domains
   displays a domain list
 
