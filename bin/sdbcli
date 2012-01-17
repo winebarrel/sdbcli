@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
+Version = '0.1.6'
 
 require 'rubygems'
 require 'sdbcli'
@@ -92,7 +93,7 @@ while buf = Readline.readline("#{region}> ", true)
     when 'exit', 'quit'
       exit
     when 'version'
-      puts 'sdbcli 0.1.6'
+      puts "sdbcli #{Version}"
     else
       execute(buf)
     end
