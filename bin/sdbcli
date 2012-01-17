@@ -36,7 +36,7 @@ def execute(query)
   end
 
   out = $runner.execute(query, inline)
-  puts YAML.dump(out) if out
+  puts YAML.dump(out) + "\n" if out
 end
 
 unless $stdin.tty?

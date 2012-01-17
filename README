@@ -47,6 +47,7 @@ https://bitbucket.org/winebarrel/sdbcli
   ---
   - [itemname1, {attr1: val1, attr2: val2}]
   - [itemname2, {attr1: val1, attr2: val2}]
+  
   ap-northeast-1> select * from test \G
   ---
   - - itemname1
