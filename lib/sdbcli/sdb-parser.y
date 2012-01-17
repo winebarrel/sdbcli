@@ -26,18 +26,38 @@ rule
                     }
                   | identifier_list
 
-  insert_stmt : INSERT INTO IDENTIFIER '(' insert_attr_list ')' VALUES '(' value_list ')'
+  insert_stmt : INSERT INTO IDENTIFIER '(' insert_identifier_list ')' VALUES '(' value_list ')'
               {
+                unless val[4].length == val[8].length
+                  raise Racc::ParseError, 'The number of an attribute and values differs'
+                end
+
                 attrs = {}
                 val[4].zip(val[8]).each {|k, v| attrs[k] = v }
-                item_name = attrs.delete(:item_name)
+                item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
+
+                unless item_name
+                  raise Racc::ParseError,'itemName is not contained in the INSERT statement'
+                end
+
+                attrs.delete(item_name[0])
+                item_name = item_name[1]
+
                 struct(:INSERT, :domain => val[2], :item_name => item_name, :attrs => attrs)
               }
 
-  insert_attr_list : ITEMNAME ',' identifier_list
-                     {
-                       [:item_name, val[2]].flatten
-                     }
+
+  insert_identifier_list : itemname_identifier
+                           {
+                             [val[0]]
+                           }
+                         | insert_identifier_list ',' itemname_identifier
+                           {
+                             val[0] + [val[2]]
+                           }
+
+  itemname_identifier : ITEMNAME
+                      | IDENTIFIER
 
   update_stmt : UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME '=' VALUE
               {
