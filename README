@@ -48,7 +48,13 @@ https://bitbucket.org/winebarrel/sdbcli
   - [itemname1, {attr1: val1, attr2: val2}]
   - [itemname2, {attr1: val1, attr2: val2}]
 
-Attribute and domain names may appear without quotes if they contain only letters, numbers, underscores (_), or dollar symbols ($) and do not start with a number.
+  ap-northeast-1> select * from `test-2`
+  ---
+  - [itemname1, {attr1: val1, attr2: val2}]
+  - [itemname2, {attr1: val1, attr2: val2}]
+
+Attribute and domain names may appear without quotes if they contain only letters, numbers, underscores (_), 
+or dollar symbols ($) and do not start with a number.
 You must quote all other attribute and domain names with the backtick (`).
 see http://docs.amazonwebservices.com/AmazonSimpleDB/latest/DeveloperGuide/QuotingRulesSelect.html
   
