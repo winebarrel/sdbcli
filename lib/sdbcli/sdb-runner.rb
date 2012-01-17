@@ -23,7 +23,9 @@ module SimpleDB
 
       case command
       when :GET
-        @driver.get(parsed.domain, parsed.item_name, parsed.attr_names)
+        item = @driver.get(parsed.domain, parsed.item_name, parsed.attr_names)
+        def item.to_yaml_style; :inline; end
+        item
       when :INSERT
         @driver.insert(parsed.domain, parsed.item_name, parsed.attrs)
         nil
@@ -34,7 +36,13 @@ module SimpleDB
         @driver.delete(parsed.domain, parsed.items)
         nil
       when :SELECT
-        @driver.select(parsed.query)
+        items = @driver.select(parsed.query)
+
+        items.each do |item|
+          def item.to_yaml_style; :inline; end
+        end
+
+        items
       when :CREATE
         @driver.create_domain(parsed.domain)
         nil
