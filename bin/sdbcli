@@ -27,7 +27,15 @@ end
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
 def execute(query)
-  out = $runner.execute(query)
+  query = query.strip.sub(/\s*;\Z/, '')
+  inline = true
+
+  if query =~ /\s*\\G\Z/i
+    query = query.sub(/\s*\\G\Z/i, '')
+    inline = false
+  end
+
+  out = $runner.execute(query, inline)
   puts YAML.dump(out) if out
 end
 
@@ -79,7 +87,7 @@ while buf = Readline.readline("#{region}> ", true)
     when 'exit', 'quit'
       exit
     else
-      execute(buf.sub(/;\Z/, ''))
+      execute(buf)
     end
   rescue => e
     puts e.message.strip
