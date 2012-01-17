@@ -13,9 +13,9 @@ secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
 sdb_endpoint      = ENV['SDB_ENDPOINT'] || 'sdb.amazonaws.com'
 
 ARGV.options do |opt|
-  opt.on('-k', '--access-key-id=AWS_ACCESS_KEY_ID') {|v| access_key_id = v }
-  opt.on('-s', '--secret-access-key=AWS_SECRET_ACCESS_KEY') {|v| secret_access_key = v }
-  opt.on('-e', '--endpoint=SDB_ENDPOINT') {|v| sdb_endpoint = v }
+  opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
+  opt.on('-s', '--secret-key=SECRET_KEY') {|v| secret_access_key = v }
+  opt.on('-e', '--endpoint=ENDPOINT') {|v| sdb_endpoint = v }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -44,15 +44,32 @@ end
 
 def help
   <<-EOS
-commands:
-  show domains
-  create domain domain_name
-  drop domain domain_name
-  get [output_list] from domain_name where itemname = '...'
-  insert into domain_name (itemname, attr1, attr2, ...) values ('name', 'val1', 'val2', ...)
-  update domain_name set attr1 = 'val1', attr2 = 'val2', ... where itemname = '...'
-  delete [attr1, attr2, ...] from domain_name itemname = '...'
-  select output_list from domain_name [where expression] [sort_instructions] [limit limit]
+command list
+--------------
+SHOW domains
+  displays a domain list
+
+CREATE domain domain_name
+  creates a domain
+
+DROP DOMAIN domain_name
+  deletes a domain
+
+GET [output_list] FROM domain_name WHERE itemName = '...'
+  gets the attribute of an item
+
+INSERT INTO domain_name (itemName, attr1, ...) values ('name', 'val1', ...)
+  creates an item
+
+UPDATE domain_name set attr1 = 'val1', ... where itemName = '...'
+  updates an item
+
+DELETE [attr1, ...] FROM domain_name itemName = '...'
+  deletes the attribute of an item or an item
+
+SELECT output_list FROM domain_name [where expression] [sort_instructions] [limit limit]
+  queries using the SELECT statement
+
     EOS
 end
 
@@ -67,6 +84,6 @@ while buf = Readline.readline("#{region}> ", true)
       execute(buf.sub(/;\Z/, ''))
     end
   rescue => e
-    puts e.message
+    puts e.message.strip
   end
 end
