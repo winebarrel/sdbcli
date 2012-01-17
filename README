@@ -2,7 +2,7 @@
 
 == Description
 
-sdbcli is interactive command-line client of Amazon SimpleDB.
+sdbcli is an interactive command-line client of Amazon SimpleDB.
 
 == Source Code
 
