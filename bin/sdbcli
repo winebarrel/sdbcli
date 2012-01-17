@@ -48,7 +48,14 @@ def execute(query)
 end
 
 unless $stdin.tty?
-  execute($stdin.read)
+  queries = $stdin.read
+
+  queries.split(';').each do |query|
+    query = query.strip
+    next if query.empty?
+    execute(query)
+  end
+
   exit 0
 end
 
