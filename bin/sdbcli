@@ -91,6 +91,8 @@ while buf = Readline.readline("#{region}> ", true)
       puts help
     when 'exit', 'quit'
       exit
+    when 'version'
+      pust 'sdbcli 0.1.6'
     else
       execute(buf)
     end
