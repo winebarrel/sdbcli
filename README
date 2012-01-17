@@ -28,7 +28,7 @@ https://bitbucket.org/winebarrel/sdbcli
   DROP DOMAIN domain_name
     deletes a domain
   
-  GET [output_list] FROM domain_name WHERE itemName = '...'
+  GET [attr_list] FROM domain_name WHERE itemName = '...'
     gets the attribute of an item
   
   INSERT INTO domain_name (itemName, attr1, ...) values ('name', 'val1', ...)
