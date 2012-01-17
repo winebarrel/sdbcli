@@ -92,7 +92,7 @@ while buf = Readline.readline("#{region}> ", true)
     when 'exit', 'quit'
       exit
     when 'version'
-      pust 'sdbcli 0.1.6'
+      puts 'sdbcli 0.1.6'
     else
       execute(buf)
     end
