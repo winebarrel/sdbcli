@@ -52,12 +52,6 @@ unless $stdin.tty?
   exit 0
 end
 
-if sdb_endpoint =~ /sdb\.([^.]+)\.amazonaws\.com/
-  region = $1
-else
-  region = 'us-east-1'
-end
-
 def help
   <<-EOS
 SHOW domains
@@ -107,7 +101,7 @@ at_exit do
   end
 end
 
-while buf = Readline.readline("#{region}> ", true)
+while buf = Readline.readline("#{$runner.region || 'unknown'}> ", true)
   if /\A\s*\Z/ =~ buf
     Readline::HISTORY.pop
     next
