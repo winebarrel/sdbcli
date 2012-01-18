@@ -141,17 +141,18 @@ module SimpleDB
     end
 
     def iterate(method, params = {})
-      Iterator.new(@client, method, params).each do |doc|
+      Iterator.new(@client, method, params, @iteratable).each do |doc|
         yield(doc)
       end
     end
 
     class Iterator
-      def initialize(client, method, params = {})
+      def initialize(client, method, params = {}, iteratable = false)
         @client = client
         @method = method
         @params = params.dup
         @token = :first
+        @iteratable = iteratable
       end
 
       def each
