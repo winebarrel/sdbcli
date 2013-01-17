@@ -9,6 +9,7 @@ require 'sdbcli'
 
 require 'optparse'
 require 'readline'
+require 'strscan'
 require 'yaml'
 
 access_key_id     = ENV['AWS_ACCESS_KEY_ID']
@@ -33,33 +34,59 @@ end
 
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
-def execute(query)
-  query = query.strip.sub(/\s*;\Z/, '')
-  inline = true
+def output_error(msg)
+  $stderr.puts "ERROR: #{msg}"
+end
 
-  if query =~ /\s*\\G\Z/i
-    query = query.sub(/\s*\\G\Z/i, '')
-    inline = false
+def execute(src)
+  ss = StringScanner.new(src.dup)
+
+  while query = ss.scan_until(/(?:;|\\G)/i)
+    src.replace(ss.rest.strip)
+    query.strip!
+
+    if query =~ /\s*\\G\Z/i
+      query = query.sub(/\s*\\G\Z/i, '')
+      inline = false
+    else
+      query = query.strip.sub(/\s*;\Z/, '')
+      inline = true
+    end
+
+    if query.empty?
+      output_error('No query specified')
+      next
+    end
+
+    out = $runner.execute(query, inline)
+
+    if out
+      out = YAML.dump(out)
+      out << "\n" unless out =~ /\n\n\Z/
+      puts out
+    end
   end
 
-  out = $runner.execute(query, inline)
-
-  if out
-    out = YAML.dump(out)
-    out << "\n" unless out =~ /\n\n\Z/
-    puts out
-  end
+  ss.rest.strip
 end
 
 unless $stdin.tty?
-  queries = $stdin.read
+  src = $stdin.read.strip
 
-  queries.split(';').each do |query|
-    next if /\A\s*\Z/ =~ query
-    execute(query)
+  unless src =~ /\s*(?:;|\\G)\Z/i
+    src << ';'
   end
 
-  exit 0
+  begin
+    execute(src)
+    exit 0
+  rescue Racc::ParseError
+    output_error 'Parse error'
+    exit 1
+  rescue => e
+    output_error e.message.strip
+    exit 1
+  end
 end
 
 def help
@@ -102,7 +129,7 @@ end
 
 at_exit do
   unless Readline::HISTORY.empty?
-    open(HISTORY_FILE, 'a') do |f|
+    open(HISTORY_FILE, 'wb') do |f|
       Readline::HISTORY.each do |line|
         next if /\A\s*\Z/ =~ line
         f.puts line
@@ -111,24 +138,42 @@ at_exit do
   end
 end
 
-while buf = Readline.readline("#{$runner.region || 'unknown'}> ", true)
+src = ''
+region = $runner.region || 'unknown'
+prompt1 = "#{region}> "
+prompt2 = "#{' ' * (region.length - 1)}-> "
+prompt = prompt1
+
+while buf = Readline.readline(prompt, true)
   if /\A\s*\Z/ =~ buf
     Readline::HISTORY.pop
     next
   end
 
-  begin
-    case buf.downcase
-    when 'help'
+  if src.empty? and buf =~ /\A\.(.+)/
+    r = /\A#{Regexp.compile($1.downcase)}/
+
+    if r =~ 'help'
       puts help
-    when 'exit', 'quit'
+    elsif r =~ 'exit' or r =~ 'quit'
       exit
-    when 'version'
+    elsif r =~ 'version'
       puts "sdbcli #{Version}"
     else
-      execute(buf)
+      output_error('Unknown command')
     end
-  rescue => e
-    puts e.message.strip
+  else
+    rv = nil
+
+    begin
+      src << (' ' + buf)
+      execute(src)
+    rescue Racc::ParseError
+      output_error 'Parse error'
+    rescue => e
+      output_error e.message.strip
+    end
+
+    prompt = src.empty? ? prompt1 : prompt2
   end
 end
