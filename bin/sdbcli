@@ -13,7 +13,11 @@ require 'yaml'
 
 access_key_id     = ENV['AWS_ACCESS_KEY_ID']
 secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
-sdb_endpoint      = ENV['SDB_ENDPOINT'] || 'sdb.amazonaws.com'
+sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['REGION_NAME'] || 'sdb.amazonaws.com'
+
+if /\A[^.]+\Z/ =~ sdb_endpoint
+  sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
+end
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
