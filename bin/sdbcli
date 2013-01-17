@@ -17,7 +17,11 @@ secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
 sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['REGION_NAME'] || 'sdb.amazonaws.com'
 
 if /\A[^.]+\Z/ =~ sdb_endpoint
-  sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
+  if sdb_endpoint == 'us-east-1'
+    sdb_endpoint = 'sdb.amazonaws.com'
+  else
+    sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
+  end
 end
 
 ARGV.options do |opt|
