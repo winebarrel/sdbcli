@@ -35,7 +35,7 @@ end
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
 def output_error(msg)
-  $stderr.puts "ERROR: #{msg}\n"
+  $stderr.puts "ERROR: #{msg}\n\n"
 end
 
 def execute(src)
