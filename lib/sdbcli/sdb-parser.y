@@ -201,31 +201,31 @@ def scan
     if (tok = @ss.scan /\s+/)
       # nothing to do
     elsif (tok = @ss.scan /(?:!=|>=|<=|>|<|=)/)
-      yield tok, tok
+      yield [tok, tok]
     elsif (tok = @ss.scan KEYWORD_REGEXP)
-      yield tok.upcase.to_sym, tok
+      yield [tok.upcase.to_sym, tok]
     elsif (tok = @ss.scan /SELECT\b/i)
-      yield :SELECT, tok + @ss.scan(/.*/)
+      yield [:SELECT, tok + @ss.scan(/.*/)]
     elsif (tok = @ss.scan /NULL\b/i)
-      yield :NULL, nil
+      yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)
-      yield :IDENTIFIER, tok.slice(1...-1).gsub(/``/, '`')
+      yield [:IDENTIFIER, tok.slice(1...-1).gsub(/``/, '`')]
     elsif (tok = @ss.scan /'([^']|'')*'/) #'
-      yield :VALUE, tok.slice(1...-1).gsub(/''/, "'")
+      yield [:VALUE, tok.slice(1...-1).gsub(/''/, "'")]
     elsif (tok = @ss.scan /"([^"]|"")*"/) #"
-      yield :VALUE, tok.slice(1...-1).gsub(/""/, '"')
+      yield [:VALUE, tok.slice(1...-1).gsub(/""/, '"')]
     elsif (tok = @ss.scan /(0|[1-9]\d*)/)
-      yield :NATURAL_NUMBER, tok.to_i
+      yield [:NATURAL_NUMBER, tok.to_i]
     elsif (tok = @ss.scan /[,\(\)\*]/)
-      yield tok, tok
+      yield [tok, tok]
     elsif (tok = @ss.scan /[a-z_$][0-9a-z_$]*\b/i)
-      yield :IDENTIFIER, tok
+      yield [:IDENTIFIER, tok]
     else
       raise Racc::ParseError, ('parse error on value "%s"' % @ss.rest.inspect)
     end
   end
 
-  yield false, '$'
+  yield [false, '$']
 end
 private :scan
 
