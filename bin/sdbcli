@@ -16,23 +16,23 @@ access_key_id     = ENV['AWS_ACCESS_KEY_ID']
 secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
 sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['REGION_NAME'] || 'sdb.amazonaws.com'
 
-if /\A[^.]+\Z/ =~ sdb_endpoint
-  if sdb_endpoint == 'us-east-1'
-    sdb_endpoint = 'sdb.amazonaws.com'
-  else
-    sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
-  end
-end
-
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
   opt.on('-s', '--secret-key=SECRET_KEY') {|v| secret_access_key = v }
-  opt.on('-e', '--endpoint=ENDPOINT') {|v| sdb_endpoint = v }
+  opt.on('-e', '--endpoint=ENDPOINT_OR_REGION') {|v| sdb_endpoint = v }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
     puts opt.help
     exit 1
+  end
+end
+
+if /\A[^.]+\Z/ =~ sdb_endpoint
+  if sdb_endpoint == 'us-east-1'
+    sdb_endpoint = 'sdb.amazonaws.com'
+  else
+    sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
   end
 end
 
