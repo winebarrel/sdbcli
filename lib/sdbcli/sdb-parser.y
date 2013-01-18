@@ -111,7 +111,10 @@ rule
               {
                 struct(:SHOW, :operand => :domains)
               }
-
+  use_stmt : USE IDENTIFIER
+             {
+               struct(:USE, :endpoint => val[1])
+             }
   desc_stmt : DESC IDENTIFIER
               {
                 struct(:DESCRIBE, :domain => val[1])
@@ -176,6 +179,7 @@ KEYWORDS = %w(
   SET
   SHOW
   UPDATE
+  USE
   VALUES
   WHERE
 )
@@ -229,10 +233,10 @@ def scan
       yield [:NATURAL_NUMBER, tok.to_i]
     elsif (tok = @ss.scan /[,\(\)\*]/)
       yield [tok, tok]
-    elsif (tok = @ss.scan /[a-z_$][0-9a-z_$]*\b/i)
+    elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
       yield [:IDENTIFIER, tok]
     else
-      raise Racc::ParseError, ('parse error on value "%s"' % @ss.rest.inspect)
+      raise Racc::ParseError, ('Parse error on value "%s"' % @ss.rest.inspect)
     end
   end
 

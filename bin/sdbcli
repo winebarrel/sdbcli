@@ -31,14 +31,6 @@ ARGV.options do |opt|
   end
 end
 
-if /\A[^.]+\Z/ =~ sdb_endpoint
-  if sdb_endpoint == 'us-east-1'
-    sdb_endpoint = 'sdb.amazonaws.com'
-  else
-    sdb_endpoint = "sdb.#{sdb_endpoint}.amazonaws.com"
-  end
-end
-
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
 def output_error(msg)
@@ -92,9 +84,6 @@ if not $stdin.tty? or command
   begin
     execute(src)
     exit 0
-  rescue Racc::ParseError
-    output_error 'Parse error'
-    exit 1
   rescue => e
     output_error e.message.strip
     exit 1
@@ -154,10 +143,9 @@ at_exit do
 end
 
 src = ''
-region = $runner.region || 'unknown'
-prompt1 = "#{region}> "
-prompt2 = "#{' ' * (region.length - 1)}-> "
-prompt = prompt1
+prompt1 = lambda { "#{$runner.region || 'unknown'}> " }
+prompt2 = lambda { "#{' ' * (($runner.region || 'unknown').length - 1)}-> " }
+prompt = prompt1.call
 
 while buf = Readline.readline(prompt, true)
   if /\A\s*\Z/ =~ buf
@@ -183,12 +171,10 @@ while buf = Readline.readline(prompt, true)
     begin
       src << (' ' + buf)
       execute(src, true)
-    rescue Racc::ParseError
-      output_error 'Parse error'
     rescue => e
       output_error e.message.strip
     end
 
-    prompt = src.empty? ? prompt1 : prompt2
+    prompt = src.empty? ? prompt1.call : prompt2.call
   end
 end

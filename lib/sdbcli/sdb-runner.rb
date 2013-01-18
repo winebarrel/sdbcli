@@ -16,6 +16,7 @@ module SimpleDB
 
   class Runner
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
+      endpoint = region_to_endpoint(endpoint)
       @driver = Driver.new(accessKeyId, secretAccessKey, endpoint)
     end
 
@@ -24,6 +25,7 @@ module SimpleDB
     end
 
     def endpoint=(v)
+      v = region_to_endpoint(v)
       @driver.endpoint = v
     end
 
@@ -71,11 +73,27 @@ module SimpleDB
         nil
       when :SHOW
         @driver.show_domains
+      when :USE
+        self.endpoint = parsed.endpoint
+        nil
       when :DESCRIBE
         @driver.describe(parsed.domain)
       else
         raise 'must not happen'
       end
+    end
+
+    private
+
+    def region_to_endpoint(region)
+      if /\A[^.]+\Z/ =~ region
+        region = SimpleDB::REGIONS.key(region)
+        raise SimpleDB::Error, 'Unknown region' unless region
+      end
+
+      raise SimpleDB::Error, 'Unknown endpoint' unless SimpleDB::REGIONS[region]
+
+      return region
     end
   end # Runner
 end # SimpleDB
