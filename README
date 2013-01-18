@@ -52,7 +52,10 @@ https://bitbucket.org/winebarrel/sdbcli
   
   SELECT output_list FROM domain_name [where expression] [sort_instructions] [limit limit]
     queries using the SELECT statement
-  
+
+  DESC domain_name
+    displays information about the domain;
+
   ap-northeast-1> select * from test;
   ---
   - [itemname1, {attr1: val1, attr2: val2}]

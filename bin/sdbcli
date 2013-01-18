@@ -122,6 +122,9 @@ DELETE [attr1, ...] FROM domain_name itemName = '...'
 SELECT output_list FROM domain_name [where expression] [sort_instructions] [limit limit]
   queries using the SELECT statement
 
+DESC domain_name
+  displays information about the domain;
+
     EOS
 end
 
