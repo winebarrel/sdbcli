@@ -77,7 +77,7 @@ def execute(src)
   ss.rest.strip
 end
 
-if $stdin.tty? or command
+if not $stdin.tty? or command
   src = command || $stdin.read.strip
 
   unless src =~ /\s*(?:;|\\G)\Z/i

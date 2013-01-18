@@ -119,6 +119,17 @@ module SimpleDB
       @client.batch_delete_attributes(domain_name, params)
     end
 
+    def describe(domain_name)
+      doc = @client.domain_metadata(domain_name)
+      h = {}
+
+      doc.at_css('DomainMetadataResult').children.each do |child|
+        h[child.name] = child.content
+      end
+
+      return h
+    end
+
     private
 
     def attrs_to_hash(node)

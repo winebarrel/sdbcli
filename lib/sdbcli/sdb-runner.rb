@@ -71,6 +71,8 @@ module SimpleDB
         nil
       when :SHOW
         @driver.show_domains
+      when :DESCRIBE
+        @driver.describe(parsed.domain)
       else
         raise 'must not happen'
       end

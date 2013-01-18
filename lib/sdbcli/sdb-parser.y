@@ -10,6 +10,7 @@ rule
        | drop_stmt
        | show_stmt
        | use_stmt
+       | desc_stmt
 
   get_stmt : GET get_output_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
              {
@@ -111,6 +112,15 @@ rule
                 struct(:SHOW, :operand => :domains)
               }
 
+  desc_stmt : DESC IDENTIFIER
+              {
+                struct(:DESCRIBE, :domain => val[1])
+              }
+            | DESCRIBE IDENTIFIER
+              {
+                struct(:DESCRIBE, :domain => val[1])
+              }
+
   identifier_list: IDENTIFIER
                              {
                                [val[0]]
@@ -144,6 +154,7 @@ KEYWORDS = %w(
   BY
   CREATE
   DELETE
+  DESCRIBE
   DESC
   DOMAINS
   DOMAIN

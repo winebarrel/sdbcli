@@ -69,6 +69,10 @@ module SimpleDB
       query('BatchDeleteAttributes', params)
     end
 
+    def domain_metadata(domain_name)
+      query('DomainMetadata', :DomainName => domain_name)
+    end
+
     private
 
     def query(action, params = {})
