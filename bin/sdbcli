@@ -45,7 +45,7 @@ def output_error(msg)
   $stderr.puts "ERROR: #{msg}\n\n"
 end
 
-def execute(src)
+def execute(src, show_rows = false)
   ss = StringScanner.new(src.dup)
 
   while query = ss.scan_until(/(?:;|\\G)/i)
@@ -68,9 +68,14 @@ def execute(src)
     out = $runner.execute(query, inline)
 
     if out
-      out = YAML.dump(out)
-      out << "\n" unless out =~ /\n\n\Z/
-      puts out
+      str = YAML.dump(out).sub(/(?:\r\n|\r|\n)*\Z/, "\n")
+
+      if show_rows and out.kind_of?(Array)
+        str << "# #{out.length} rows in set\n"
+      end
+
+      str << "\n"
+      puts str
     end
   end
 
@@ -177,7 +182,7 @@ while buf = Readline.readline(prompt, true)
 
     begin
       src << (' ' + buf)
-      execute(src)
+      execute(src, true)
     rescue Racc::ParseError
       output_error 'Parse error'
     rescue => e
