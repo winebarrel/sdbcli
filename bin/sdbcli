@@ -34,7 +34,7 @@ end
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
 def output_error(msg)
-  $stderr.puts "ERROR: #{msg}\n\n"
+  $stderr.puts "# #{msg}\n\n"
 end
 
 def execute(src, show_rows = false)
@@ -92,8 +92,11 @@ end
 
 def help
   <<-EOS
-SHOW domains
+SHOW DOMAINS
   displays a domain list
+
+SHOW REGIONS
+  displays a region list
 
 CREATE domain domain_name
   creates a domain

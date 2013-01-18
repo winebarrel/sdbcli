@@ -29,8 +29,11 @@ https://bitbucket.org/winebarrel/sdbcli
 == Example
 
   ap-northeast-1> .help
-  SHOW domains
+  SHOW DOMAINS
     displays a domain list
+  
+  SHOW REGIONS
+    displays a region list
   
   CREATE domain domain_name
     creates a domain

@@ -111,6 +111,10 @@ rule
               {
                 struct(:SHOW, :operand => :domains)
               }
+            | SHOW REGIONS
+              {
+                struct(:SHOW, :operand => :regions)
+              }
   use_stmt : USE IDENTIFIER
              {
                struct(:USE, :endpoint => val[1])
@@ -176,6 +180,7 @@ KEYWORDS = %w(
   NOT
   ORDER
   OR
+  REGIONS
   SET
   SHOW
   UPDATE

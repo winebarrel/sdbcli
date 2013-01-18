@@ -73,7 +73,14 @@ module SimpleDB
         @driver.drop_domain(parsed.domain)
         nil
       when :SHOW
-        @driver.show_domains
+        case parsed.operand
+        when :domains
+          @driver.show_domains
+        when :regions
+          SimpleDB::REGIONS.values.sort
+        else
+          raise 'must not happen'
+        end
       when :USE
         self.endpoint = parsed.endpoint
         nil
