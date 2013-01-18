@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name              = 'sdbcli'
-  spec.version           = '0.3.2'
+  spec.version           = '0.3.3'
   spec.summary           = 'sdbcli is an interactive command-line client of Amazon SimpleDB.'
   spec.require_paths     = %w(lib)
   spec.files             = %w(README) + Dir.glob('bin/**/*') + Dir.glob('lib/**/*')
