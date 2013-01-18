@@ -3,6 +3,7 @@ $LOAD_PATH << File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
 
 Version = '0.3.3'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
+HISTSIZE = 500
 
 require 'rubygems'
 require 'sdbcli'
@@ -140,7 +141,7 @@ end
 at_exit do
   unless Readline::HISTORY.empty?
     open(HISTORY_FILE, 'wb') do |f|
-      Readline::HISTORY.each do |line|
+      Readline::HISTORY.to_a.slice(-(Readline::HISTORY.length < HISTSIZE ? Readline::HISTORY.length : HISTSIZE)..-1).each do |line|
         next if /\A\s*\Z/ =~ line
         f.puts line
       end
