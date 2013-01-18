@@ -16,11 +16,13 @@ require 'yaml'
 access_key_id     = ENV['AWS_ACCESS_KEY_ID']
 secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
 sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['REGION_NAME'] || 'sdb.amazonaws.com'
+command = nil
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
   opt.on('-s', '--secret-key=SECRET_KEY') {|v| secret_access_key = v }
-  opt.on('-e', '--endpoint=ENDPOINT_OR_REGION') {|v| sdb_endpoint = v }
+  opt.on('-r', '--region=REGION') {|v| sdb_endpoint = v }
+  opt.on('-e', '--eval=COMMAND') {|v| command = v }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -75,8 +77,8 @@ def execute(src)
   ss.rest.strip
 end
 
-unless $stdin.tty?
-  src = $stdin.read.strip
+if $stdin.tty? or command
+  src = command || $stdin.read.strip
 
   unless src =~ /\s*(?:;|\\G)\Z/i
     src << ';'
