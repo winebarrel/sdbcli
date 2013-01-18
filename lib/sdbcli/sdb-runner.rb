@@ -10,6 +10,7 @@ module SimpleDB
       'sdb.us-west-2.amazonaws.com'      => 'us-west-2',
       'sdb.eu-west-1.amazonaws.com'      => 'eu-west-1',
       'sdb.ap-southeast-1.amazonaws.com' => 'ap-southeast-1',
+      'sdb.ap-southeast-2.amazonaws.com' => 'ap-southeast-2',
       'sdb.ap-northeast-1.amazonaws.com' => 'ap-northeast-1',
       'sdb.sa-east-1.amazonaws.com'      => 'sa-east-1',
     }
