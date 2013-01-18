@@ -236,7 +236,7 @@ def scan
     elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
       yield [:IDENTIFIER, tok]
     else
-      raise Racc::ParseError, ('Parse error on value "%s"' % @ss.rest.inspect)
+      raise Racc::ParseError, ('parse error on value "%s"' % @ss.rest.inspect)
     end
   end
 
