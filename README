@@ -54,7 +54,10 @@ https://bitbucket.org/winebarrel/sdbcli
     queries using the SELECT statement
   
   DESC domain_name
-    displays information about the domain;
+    displays information about the domain
+  
+  USE region_or_endpoint
+    changes an endpoint
   
   ap-northeast-1> select * from test;
   ---

@@ -117,7 +117,10 @@ SELECT output_list FROM domain_name [where expression] [sort_instructions] [limi
   queries using the SELECT statement
 
 DESC domain_name
-  displays information about the domain;
+  displays information about the domain
+
+USE region_or_endpoint
+  changes an endpoint
 
     EOS
 end
