@@ -43,7 +43,7 @@ def execute(src, show_rows = false)
   buf = ''
 
   until ss.eos?
-    if (tok = ss.scan /[^`'";\\]+/)
+    if (tok = ss.scan %r{[^-`'";\\/#]+})
       buf << tok
     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
       buf << tok
@@ -51,6 +51,12 @@ def execute(src, show_rows = false)
       buf << tok
     elsif (tok = ss.scan /"(?:[^"]|"")*"/) #"
       buf << tok
+    elsif (tok = ss.scan %r{/\*/?(\n|[^/]|[^*]/)*\*/})
+      # nothing to do
+    elsif (tok = ss.scan /--[^\r\n]*(?:\r\n|\r|\n|\Z)/)
+      # nothing to do
+    elsif (tok = ss.scan /#[^\r\n]*(?:\r\n|\r|\n|\Z)/)
+      # nothing to do
     elsif (tok = ss.scan /(?:;|\\G)/)
       src.replace(ss.rest)
       query = buf
@@ -84,7 +90,7 @@ def execute(src, show_rows = false)
     end
   end
 
-  src.replace(buf)
+  src.replace(buf.strip)
   buf
 end
 
