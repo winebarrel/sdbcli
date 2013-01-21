@@ -97,6 +97,7 @@ module SimpleDB
       if /\A[^.]+\Z/ =~ region
         region = SimpleDB::REGIONS.find {|k, v| v == region }
         raise SimpleDB::Error, 'Unknown region' unless region
+        region = region.first
       end
 
       raise SimpleDB::Error, 'Unknown endpoint' unless SimpleDB::REGIONS[region]
