@@ -13,17 +13,19 @@ require 'readline'
 require 'strscan'
 require 'syck' if /\A1\.9/ =~ RUBY_VERSION
 require 'yaml'
+require 'json'
 
 access_key_id     = ENV['AWS_ACCESS_KEY_ID']
 secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
 sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['REGION_NAME'] || 'sdb.amazonaws.com'
 command = nil
+$format = :yaml
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
   opt.on('-s', '--secret-key=SECRET_KEY') {|v| secret_access_key = v }
   opt.on('-r', '--region=REGION') {|v| sdb_endpoint = v }
-  opt.on('-e', '--eval=COMMAND') {|v| command = v }
+  opt.on('-f', '--format=YAML_OR_JSON', [:yaml, :json]) {|v| $format = v }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -35,7 +37,16 @@ end
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
 def output_error(msg)
-  $stderr.puts "# #{msg}\n\n"
+  case $format
+  when :yaml
+    msg = "# #{msg}\n\n"
+  when :json
+    msg = "// #{msg}\n\n"
+  else
+    msg = "# #{msg}\n\n"
+  end
+
+  $stderr.puts msg
 end
 
 def execute(src, show_rows = false)
@@ -76,10 +87,32 @@ def execute(src, show_rows = false)
       out = $runner.execute(query, inline)
 
       if out
-        str = YAML.dump(out).sub(/(?:\r\n|\r|\n)*\Z/, "\n")
+        str = nil
+
+        case $format
+        when :yaml
+          str = YAML.dump(out)
+        when :json
+          str = JSON.pretty_generate(out)
+        else
+          output_error('Unknown format')
+        end
+
+        str.sub!(/(?:\r\n|\r|\n)*\Z/, "\n")
 
         if show_rows and out.kind_of?(Array)
-          str << "# #{out.length} #{out.length > 1 ? 'rows' : 'row'} in set\n"
+          rows_msg = nil
+
+          case $format
+          when :yaml
+            rows_msg = "# #{out.length} #{out.length > 1 ? 'rows' : 'row'} in set\n"
+          when :json
+            rows_msg = "// #{out.length} #{out.length > 1 ? 'rows' : 'row'} in set\n"
+          else
+            rows_msg = "# #{out.length} #{out.length > 1 ? 'rows' : 'row'} in set\n"
+          end
+
+          str << rows_msg
         end
 
         str << "\n"
