@@ -40,39 +40,52 @@ end
 
 def execute(src, show_rows = false)
   ss = StringScanner.new(src.dup)
+  buf = ''
 
-  while query = ss.scan_until(/(?:;|\\G)/i)
-    src.replace(ss.rest.strip)
-    query.strip!
+  until ss.eos?
+    if (tok = ss.scan /[^`'";\\]+/)
+      buf << tok
+    elsif (tok = ss.scan /`(?:[^`]|``)*`/)
+      buf << tok
+    elsif (tok = ss.scan /'(?:[^']|'')*'/) #'
+      buf << tok
+    elsif (tok = ss.scan /"(?:[^"]|"")*"/) #"
+      buf << tok
+    elsif (tok = ss.scan /(?:;|\\G)/)
+      src.replace(ss.rest)
+      query = buf
+      buf = ''
 
-    if query =~ /\s*\\G\Z/i
-      query = query.sub(/\s*\\G\Z/i, '')
-      inline = false
-    else
-      query = query.strip.sub(/\s*;\Z/, '')
-      inline = true
-    end
-
-    if query.empty?
-      output_error('No query specified')
-      next
-    end
-
-    out = $runner.execute(query, inline)
-
-    if out
-      str = YAML.dump(out).sub(/(?:\r\n|\r|\n)*\Z/, "\n")
-
-      if show_rows and out.kind_of?(Array)
-        str << "# #{out.length} rows in set\n"
+      if tok == '\G'
+        inline = false
+      else
+        inline = true
       end
 
-      str << "\n"
-      puts str
+      if query.strip.empty?
+        output_error('No query specified')
+        next
+      end
+
+      out = $runner.execute(query, inline)
+
+      if out
+        str = YAML.dump(out).sub(/(?:\r\n|\r|\n)*\Z/, "\n")
+
+        if show_rows and out.kind_of?(Array)
+          str << "# #{out.length} #{out.length > 1 ? 'rows' : 'row'} in set\n"
+        end
+
+        str << "\n"
+        puts str
+      end
+    elsif (tok = ss.scan /./)
+      buf << tok
     end
   end
 
-  ss.rest.strip
+  src.replace(buf)
+  buf
 end
 
 if not $stdin.tty? or command
@@ -177,7 +190,12 @@ while buf = Readline.readline(prompt, true)
     rv = nil
 
     begin
-      src << (' ' + buf)
+      if src.empty?
+        src << buf
+      else
+        src << ("\n" + buf)
+      end
+
       execute(src, true)
     rescue => e
       output_error e.message.strip
