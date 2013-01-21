@@ -108,17 +108,18 @@ DROP DOMAIN domain_name
 GET [attr_list] FROM domain_name WHERE itemName = '...'
   gets the attribute of an item
 
-INSERT INTO domain_name (itemName, attr1, ...) values ('name', 'val1', ...)
+INSERT INTO domain_name (itemName, attr1, ...) VALUES ('name', 'val1', ...)
   creates an item
 
-UPDATE domain_name set attr1 = 'val1', ... where itemName = '...'
+UPDATE domain_name set attr1 = 'val1', ... WHERE itemName = '...'
   updates an item
 
-DELETE [attr1, ...] FROM domain_name itemName = '...'
+DELETE [attr1, ...] FROM domain_name WHERE itemName = '...'
   deletes the attribute of an item or an item
 
-SELECT output_list FROM domain_name [where expression] [sort_instructions] [limit limit]
+SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit]
   queries using the SELECT statement
+  see http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/UsingSelect.html
 
 DESC domain_name
   displays information about the domain
