@@ -35,6 +35,8 @@ https://bitbucket.org/winebarrel/sdbcli
 == Example
 
   ap-northeast-1> .help
+  # Explanatory notes of a query
+  
   SHOW DOMAINS
     displays a domain list
   
@@ -69,14 +71,24 @@ https://bitbucket.org/winebarrel/sdbcli
   USE region_or_endpoint
     changes an endpoint
   
+  
+  # List of commands
+  
+  .help                 displays this message
+  .quit | .exit         exits sdbcli
+  .format (yaml|json)?  displays a format or changes it
+  .version              displays a version
+  
   ap-northeast-1> select * from test;
   ---
   - [itemname1, {attr1: val1, attr2: val2}]
   - [itemname2, {attr1: val1, attr2: val2}]
-  
+  # 2 rows in set
+
   ap-northeast-1> select count(*) from `test-2`;
   ---
   - [Domain, {Count: "100"}]
+  # 1 row in set
 
 Attribute and domain names may appear without quotes if they contain only letters, numbers, underscores (_), 
 or dollar symbols ($) and do not start with a number.
@@ -91,6 +103,7 @@ see http://docs.amazonwebservices.com/AmazonSimpleDB/latest/DeveloperGuide/Quoti
     - itemname2
     - attr1: val1
       attr2: val2
+  # 2 rows in set
   
   shell> echo 'select * from test' | sdbcli
   ---
