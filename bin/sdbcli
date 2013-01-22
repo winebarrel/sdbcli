@@ -146,6 +146,8 @@ end
 
 def help
   <<-EOS
+# Explanatory notes of a query
+
 SHOW DOMAINS
   displays a domain list
 
@@ -179,6 +181,14 @@ DESC domain_name
 
 USE region_or_endpoint
   changes an endpoint
+
+
+# List of commands
+
+.help                 displays this message
+.quit | .exit         exits sdbcli
+.format (yaml|json)?  displays a format or changes it
+.version              displays a version
 
     EOS
 end
@@ -215,12 +225,24 @@ while buf = Readline.readline(prompt, true)
   end
 
   if src.empty? and buf =~ /\A\.(.+)/
-    r = /\A#{Regexp.compile($1.downcase)}/
+    cmd, arg = $1.split(/\s+/i, 2)
+    r = /\A#{Regexp.compile(cmd.downcase)}/
 
     if r =~ 'help'
       puts help
     elsif r =~ 'exit' or r =~ 'quit'
       exit
+    elsif r =~ 'format'
+      case arg
+      when nil
+        puts $format
+      when 'yaml'
+        $format = :yaml
+      when 'json'
+        $format = :json
+      else
+        output_error('Unknown format')
+      end
     elsif r =~ 'version'
       puts "sdbcli #{Version}"
     else
