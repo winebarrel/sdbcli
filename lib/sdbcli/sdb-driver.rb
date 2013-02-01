@@ -44,20 +44,27 @@ module SimpleDB
 
     # attr action
 
-    def insert(domain_name, item_name, attrs = {}, consistent = false)
-      params = {:ConsistentRead => consistent}
-      i = 0
+    def insert(domain_name, items = {}, consistent = false)
+      until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
+        params = {:ConsistentRead => consistent}
+        i = j = 0
 
-      attrs.each do |name, values|
-        [values].flatten.each do |v|
+        chunk.each do |item_name, attrs|
           i += 1
-          params["Attribute.#{i}.Name"] = name
-          params["Attribute.#{i}.Value"] = v
-          params["Attribute.#{i}.Replace"] = false
-        end
-      end
+          params["Item.#{i}.ItemName"] = item_name
 
-      @client.put_attributes(domain_name, item_name, params)
+          (attrs || {}).each do |attr_name, values|
+            [values].flatten.each do |v|
+              j += 1
+              params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
+              params["Item.#{i}.Attribute.#{j}.Value"] = v
+              params["Item.#{i}.Attribute.#{j}.Replace"] = false
+            end
+          end
+        end
+
+        @client.batch_put_attributes(domain_name, params)
+      end
     end
 
     def update(domain_name, items = {}, consistent = false)

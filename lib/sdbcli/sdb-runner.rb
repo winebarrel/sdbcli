@@ -48,7 +48,8 @@ module SimpleDB
 
         item
       when :INSERT
-        @driver.insert(parsed.domain, parsed.item_name, parsed.attrs)
+        items = [[parsed.item_name, parsed.attrs]]
+        @driver.insert(parsed.domain, items)
         1
       when :UPDATE
         @driver.update(parsed.domain, parsed.items)
