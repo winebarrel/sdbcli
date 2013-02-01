@@ -11,6 +11,10 @@ rule
        | show_stmt
        | use_stmt
        | desc_stmt
+       | error
+       {
+         @upd_or_del_with_expr
+       }
 
   get_stmt : GET get_output_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
              {
@@ -66,6 +70,24 @@ rule
                 val[3].each {|k, v| attrs[k] = v }
                 struct(:UPDATE, :domain => val[1], :items => [[val[7], attrs]])
               }
+              | UPDATE IDENTIFIER SET set_clause_list
+              {
+                attrs = {}
+                val[3].each {|k, v| attrs[k] = v }
+                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
+              }
+              | UPDATE IDENTIFIER SET set_clause_list WHERE
+              {
+                attrs = {}
+                val[3].each {|k, v| attrs[k] = v }
+                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+              }
+              | UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME
+              {
+                attrs = {}
+                val[3].each {|k, v| attrs[k] = v }
+                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
+              }
 
   set_clause_list : set_clause
                     {
@@ -84,6 +106,18 @@ rule
   delete_stmt : DELETE delete_attr_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
                 {
                   struct(:DELETE, :domain => val[3], :items => [[val[7], val[1]]])
+                }
+              | DELETE delete_attr_list FROM IDENTIFIER
+                {
+                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => '')
+                }
+              | DELETE delete_attr_list FROM WHERE
+                {
+                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE ')
+                }
+              | DELETE delete_attr_list FROM WHERE ITEMNAME
+                {
+                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE itemName')
                 }
 
   delete_attr_list : 
@@ -255,6 +289,14 @@ end
 
 def self.parse(obj)
   self.new(obj).parse
+end
+
+def on_error(error_token_id, error_value, value_stack)
+  if @upd_or_del_with_expr
+    @upd_or_del_with_expr.expr << (error_value + @ss.scan_until(/\Z/))
+  else
+    super
+  end
 end
 
 ---- footer
