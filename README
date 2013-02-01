@@ -55,10 +55,12 @@ https://bitbucket.org/winebarrel/sdbcli
   INSERT INTO domain_name (itemName, attr1, ...) VALUES ('name', 'val1', ...)
     creates an item
   
-  UPDATE domain_name set attr1 = 'val1', ... WHERE itemName = '...'
+  UPDATE domain_name {SET|ADD} = 'val1', ... WHERE itemName = '...'
+  UPDATE domain_name {SET|ADD} = 'val1', ... [WHERE expression] [sort_instructions] [LIMIT limit]
     updates an item
   
   DELETE [attr1, ...] FROM domain_name WHERE itemName = '...'
+  DELETE [attr1, ...] FROM domain_name WHERE [WHERE expression] [sort_instructions] [LIMIT limit]
     deletes the attribute of an item or an item
   
   SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit]
