@@ -49,13 +49,25 @@ module SimpleDB
         item
       when :INSERT
         @driver.insert(parsed.domain, parsed.item_name, parsed.attrs)
-        nil
+        1
       when :UPDATE
         @driver.update(parsed.domain, parsed.items)
-        nil
+        1
+      when :UPDATE_WITH_EXPR
+        query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
+        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        rownum = items.length
+        @driver.update(parsed.domain, items)
+        rownum
       when :DELETE
         @driver.delete(parsed.domain, parsed.items)
-        nil
+        1
+      when :DELETE_WITH_EXPR
+        query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
+        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        rownum = items.length
+        @driver.delete(parsed.domain, items)
+        rownum
       when :SELECT
         items = @driver.select(parsed.query)
 

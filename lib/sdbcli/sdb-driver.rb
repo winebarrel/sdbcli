@@ -4,6 +4,8 @@ module SimpleDB
   class Error < StandardError; end
 
   class Driver
+    MAX_NUMBER_SUBMITTED_ITEMS = 25
+
     attr_accessor :iteratable
 
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
@@ -59,24 +61,26 @@ module SimpleDB
     end
 
     def update(domain_name, items = {}, consistent = false)
-      params = {:ConsistentRead => consistent}
-      i = j = 0
+      until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
+        params = {:ConsistentRead => consistent}
+        i = j = 0
 
-      items.each do |item_name, attrs|
-        i += 1
-        params["Item.#{i}.ItemName"] = item_name
+        chunk.each do |item_name, attrs|
+          i += 1
+          params["Item.#{i}.ItemName"] = item_name
 
-        (attrs || {}).each do |attr_name, values|
-          [values].flatten.each do |v|
-            j += 1
-            params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
-            params["Item.#{i}.Attribute.#{j}.Value"] = v
-            params["Item.#{i}.Attribute.#{j}.Replace"] = true
+          (attrs || {}).each do |attr_name, values|
+            [values].flatten.each do |v|
+              j += 1
+              params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
+              params["Item.#{i}.Attribute.#{j}.Value"] = v
+              params["Item.#{i}.Attribute.#{j}.Replace"] = true
+            end
           end
         end
-      end
 
-      @client.batch_put_attributes(domain_name, params)
+        @client.batch_put_attributes(domain_name, params)
+      end
     end
 
     def get(domain_name, item_name, attr_names = [], consistent = false)
@@ -100,23 +104,25 @@ module SimpleDB
     end
 
     def delete(domain_name, items = {}, consistent = false)
-      params = {:ConsistentRead => consistent}
-      i = j = 0
+      until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
+        params = {:ConsistentRead => consistent}
+        i = j = 0
 
-      items.each do |item_name, attrs|
-        i += 1
-        params["Item.#{i}.ItemName"] = item_name
+        chunk.each do |item_name, attrs|
+          i += 1
+          params["Item.#{i}.ItemName"] = item_name
 
-        (attrs || []).each do |attr_name, values|
-          [values].flatten.each do |v|
-            j += 1
-            params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
-            params["Item.#{i}.Attribute.#{j}.Value"] = v if v
+          (attrs || []).each do |attr_name, values|
+            [values].flatten.each do |v|
+              j += 1
+              params["Item.#{i}.Attribute.#{j}.Name"] = attr_name
+              params["Item.#{i}.Attribute.#{j}.Value"] = v if v
+            end
           end
         end
-      end
 
-      @client.batch_delete_attributes(domain_name, params)
+        @client.batch_delete_attributes(domain_name, params)
+      end
     end
 
     def describe(domain_name)
