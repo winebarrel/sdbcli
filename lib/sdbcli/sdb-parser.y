@@ -4,6 +4,7 @@ rule
   stmt : get_stmt
        | insert_stmt
        | update_stmt
+       | merge_stmt
        | delete_stmt
        | select_stmt
        | create_stmt
@@ -12,9 +13,9 @@ rule
        | use_stmt
        | desc_stmt
        | error
-       {
-         @upd_or_del_with_expr
-       }
+         {
+           @stmt_with_expr
+         }
 
   get_stmt : GET get_output_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
              {
@@ -32,24 +33,24 @@ rule
                   | identifier_list
 
   insert_stmt : INSERT INTO IDENTIFIER '(' insert_identifier_list ')' VALUES '(' value_list ')'
-              {
-                unless val[4].length == val[8].length
-                  raise Racc::ParseError, 'The number of an attribute and values differs'
-                end
+                {
+                  unless val[4].length == val[8].length
+                    raise Racc::ParseError, 'The number of an attribute and values differs'
+                  end
 
-                attrs = {}
-                val[4].zip(val[8]).each {|k, v| attrs[k] = v }
-                item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
+                  attrs = {}
+                  val[4].zip(val[8]).each {|k, v| attrs[k] = v }
+                  item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
 
-                unless item_name
-                  raise Racc::ParseError,'itemName is not contained in the INSERT statement'
-                end
+                  unless item_name
+                    raise Racc::ParseError,'itemName is not contained in the INSERT statement'
+                  end
 
-                attrs.delete(item_name[0])
-                item_name = item_name[1]
+                  attrs.delete(item_name[0])
+                  item_name = item_name[1]
 
-                struct(:INSERT, :domain => val[2], :item_name => item_name, :attrs => attrs)
-              }
+                  struct(:INSERT, :domain => val[2], :item_name => item_name, :attrs => attrs)
+                }
 
 
   insert_identifier_list : itemname_identifier
@@ -65,29 +66,54 @@ rule
                       | IDENTIFIER
 
   update_stmt : UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME '=' VALUE
-              {
-                attrs = {}
-                val[3].each {|k, v| attrs[k] = v }
-                struct(:UPDATE, :domain => val[1], :items => [[val[7], attrs]])
-              }
+                {
+                  attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  struct(:UPDATE, :domain => val[1], :items => [[val[7], attrs]])
+                }
               | UPDATE IDENTIFIER SET set_clause_list
-              {
-                attrs = {}
-                val[3].each {|k, v| attrs[k] = v }
-                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
-              }
+                {
+                  attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
+                }
               | UPDATE IDENTIFIER SET set_clause_list WHERE
-              {
-                attrs = {}
-                val[3].each {|k, v| attrs[k] = v }
-                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
-              }
+                {
+                  attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+                }
               | UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME
-              {
-                attrs = {}
-                val[3].each {|k, v| attrs[k] = v }
-                @upd_or_del_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
-              }
+                {
+                  attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
+                }
+
+  merge_stmt : UPDATE IDENTIFIER ADD set_clause_list WHERE ITEMNAME '=' VALUE
+               {
+                 attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
+                 struct(:MERGE, :domain => val[1], :items => [[val[7], attrs]])
+               }
+             | UPDATE IDENTIFIER ADD set_clause_list
+               {
+                 attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
+                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
+               }
+             | UPDATE IDENTIFIER ADD set_clause_list WHERE
+               {
+                 attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
+                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+               }
+             | UPDATE IDENTIFIER ADD set_clause_list WHERE ITEMNAME
+               {
+                 attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
+                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
+               }
 
   set_clause_list : set_clause
                     {
@@ -109,15 +135,15 @@ rule
                 }
               | DELETE delete_attr_list FROM IDENTIFIER
                 {
-                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => '')
+                  @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => '')
                 }
               | DELETE delete_attr_list FROM WHERE
                 {
-                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE ')
+                  @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE ')
                 }
               | DELETE delete_attr_list FROM WHERE ITEMNAME
                 {
-                  @upd_or_del_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE itemName')
+                  @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE itemName')
                 }
 
   delete_attr_list : 
@@ -163,22 +189,22 @@ rule
               }
 
   identifier_list: IDENTIFIER
-                             {
-                               [val[0]]
-                             }
-                           | identifier_list ',' IDENTIFIER
-                             {
-                               val[0] + [val[2]]
-                             }
+                   {
+                     [val[0]]
+                   }
+                 | identifier_list ',' IDENTIFIER
+                   {
+                     val[0] + [val[2]]
+                   }
 
   value_list : VALUE
-                         {
-                           [val[0]]
-                         }
-                       | value_list ',' VALUE
-                         {
-                          [val[0], val[2]].flatten
-                         }
+               {
+                 [val[0]]
+               }
+             | value_list ',' VALUE
+               {
+                 [val[0], val[2]].flatten
+               }
 
 ---- header
 
@@ -189,6 +215,7 @@ module SimpleDB
 ---- inner
 
 KEYWORDS = %w(
+  ADD
   AND
   ASC
   BETWEEN
@@ -292,8 +319,8 @@ def self.parse(obj)
 end
 
 def on_error(error_token_id, error_value, value_stack)
-  if @upd_or_del_with_expr
-    @upd_or_del_with_expr.expr << (error_value + @ss.scan_until(/\Z/))
+  if @stmt_with_expr
+    @stmt_with_expr.expr << (error_value + @ss.scan_until(/\Z/))
   else
     super
   end

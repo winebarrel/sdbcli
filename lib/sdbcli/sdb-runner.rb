@@ -60,6 +60,15 @@ module SimpleDB
         rownum = items.length
         @driver.update(parsed.domain, items)
         rownum
+      when :MERGE
+        @driver.insert(parsed.domain, parsed.items)
+        1
+      when :MERGE_WITH_EXPR
+        query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
+        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        rownum = items.length
+        @driver.insert(parsed.domain, items)
+        rownum
       when :DELETE
         @driver.delete(parsed.domain, parsed.items)
         1
