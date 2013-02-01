@@ -48,12 +48,13 @@ module SimpleDB
 
         item
       when :INSERT
-        items = [[parsed.item_name, parsed.attrs]]
-        @driver.insert(parsed.domain, items)
-        1
+        rownum = parsed.items.length
+        @driver.insert(parsed.domain, parsed.items)
+        rownum
       when :UPDATE
+        rownum = parsed.items.length
         @driver.update(parsed.domain, parsed.items)
-        1
+        rownum
       when :UPDATE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
@@ -61,8 +62,9 @@ module SimpleDB
         @driver.update(parsed.domain, items)
         rownum
       when :MERGE
+        rownum = parsed.items.length
         @driver.insert(parsed.domain, parsed.items)
-        1
+        rownum
       when :MERGE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
@@ -70,8 +72,9 @@ module SimpleDB
         @driver.insert(parsed.domain, items)
         rownum
       when :DELETE
+        rownum = parsed.items.length
         @driver.delete(parsed.domain, parsed.items)
-        1
+        rownum
       when :DELETE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query).map {|i| [i[0], parsed.attrs] }

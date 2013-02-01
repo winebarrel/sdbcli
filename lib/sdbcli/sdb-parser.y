@@ -32,26 +32,38 @@ rule
                     }
                   | identifier_list
 
-  insert_stmt : INSERT INTO IDENTIFIER '(' insert_identifier_list ')' VALUES '(' value_list ')'
+  value_list_list : '(' value_list ')'
+                    {
+                      [val[1]]
+                    }
+                  | value_list_list ',' '(' value_list ')'
+                    {
+                      val[0] + [val[3]]
+                    }
+
+  insert_stmt : INSERT INTO IDENTIFIER '(' insert_identifier_list ')' VALUES value_list_list
                 {
-                  unless val[4].length == val[8].length
-                    raise Racc::ParseError, 'The number of an attribute and values differs'
+                  items = val[7].map do |vals|
+                    unless val[4].length == vals.length
+                      raise Racc::ParseError, 'The number of an attribute and values differs'
+                    end
+
+                    attrs = {}
+                    val[4].zip(vals).each {|k, v| attrs[k] = v }
+                    item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
+
+                    unless item_name
+                      raise Racc::ParseError,'itemName is not contained in the INSERT statement'
+                    end
+
+                    attrs.delete(item_name[0])
+                    item_name = item_name[1]
+
+                    [item_name, attrs]
                   end
 
-                  attrs = {}
-                  val[4].zip(val[8]).each {|k, v| attrs[k] = v }
-                  item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
-
-                  unless item_name
-                    raise Racc::ParseError,'itemName is not contained in the INSERT statement'
-                  end
-
-                  attrs.delete(item_name[0])
-                  item_name = item_name[1]
-
-                  struct(:INSERT, :domain => val[2], :item_name => item_name, :attrs => attrs)
+                  struct(:INSERT, :domain => val[2], :items => items)
                 }
-
 
   insert_identifier_list : itemname_identifier
                            {

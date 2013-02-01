@@ -13,7 +13,7 @@ module SimpleDB
 
 class Parser < Racc::Parser
 
-module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 216)
+module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 228)
 
 KEYWORDS = %w(
   ADD
@@ -131,68 +131,70 @@ end
 ##### State transition tables begin ###
 
 racc_action_table = [
-    13,    14,    64,    67,    63,    29,    62,    36,    37,    15,
-    27,    59,    65,    65,    71,    16,    72,    41,    17,    18,
-    19,    42,    20,    21,    57,    58,    22,    23,    24,    91,
-    63,    92,    62,    45,    46,    43,    44,    39,    47,    43,
-    48,    49,    50,    51,    52,    55,    55,    38,    40,    35,
-    34,    66,    29,    68,    69,    70,    31,    73,    55,    75,
-    76,    77,    78,    79,    30,    81,    82,    83,    84,    85,
-    86,    87,    88,    90,    25,    93 ]
+    13,    14,    67,    64,    25,    63,    29,    62,    42,    65,
+    65,    27,    15,    43,    63,    16,    62,    44,    17,    18,
+    19,    40,    20,    21,    98,    94,    22,    23,    24,    71,
+    72,    36,    37,    93,    94,    57,    58,    45,    46,    47,
+    43,    48,    49,    50,    51,    52,    55,    55,    39,    59,
+    38,    35,    66,    41,    68,    69,    70,    34,    73,    55,
+    75,    76,    77,    78,    79,    29,    81,    82,    83,    84,
+    85,    87,    88,    89,    91,    92,    31,    95,    96,    91,
+    30 ]
 
 racc_action_check = [
-     0,     0,    53,    56,    72,    14,    72,    21,    21,     0,
-    14,    50,    53,    56,    60,     0,    60,    25,     0,     0,
-     0,    26,     0,     0,    47,    47,     0,     0,     0,    89,
-    52,    89,    52,    31,    31,    28,    30,    23,    32,    33,
-    34,    35,    42,    43,    44,    45,    46,    22,    24,    20,
-    19,    55,    17,    57,    58,    59,    16,    64,    65,    66,
-    67,    68,    70,    71,    15,    73,    76,    77,    78,    79,
-    81,    82,    83,    85,     1,    92 ]
+     0,     0,    56,    53,     1,    52,    14,    52,    26,    56,
+    53,    14,     0,    28,    72,     0,    72,    30,     0,     0,
+     0,    24,     0,     0,    97,    97,     0,     0,     0,    60,
+    60,    21,    21,    90,    90,    47,    47,    31,    31,    32,
+    33,    34,    35,    42,    43,    44,    45,    46,    23,    50,
+    22,    20,    55,    25,    57,    58,    59,    19,    64,    65,
+    66,    67,    68,    70,    71,    17,    73,    76,    77,    78,
+    79,    81,    82,    83,    85,    86,    16,    92,    94,    95,
+    15 ]
 
 racc_action_pointer = [
-    -1,    74,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   nil,   nil,     1,    53,    52,    48,   nil,    28,
-    27,   -18,    43,    33,    44,    17,    18,   nil,    20,   nil,
-    32,    16,    35,    24,    36,    37,   nil,   nil,   nil,   nil,
-   nil,   nil,    38,    39,    32,    41,    42,    20,   nil,   nil,
-     6,   nil,    26,    -3,   nil,    44,    -2,    48,    48,    49,
-     1,   nil,   nil,   nil,    51,    54,    51,    54,    55,   nil,
-    55,    49,     0,    58,   nil,   nil,    59,    60,    60,    57,
-   nil,    62,    63,    64,   nil,    65,   nil,   nil,   nil,    16,
-   nil,   nil,    67,   nil ]
+    -1,     4,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,     2,    66,    72,    61,   nil,    35,
+    29,     6,    46,    44,    17,    53,     5,   nil,     1,   nil,
+    13,    20,    36,    28,    37,    38,   nil,   nil,   nil,   nil,
+   nil,   nil,    39,    40,    35,    42,    43,    31,   nil,   nil,
+    44,   nil,     1,    -2,   nil,    45,    -3,    49,    49,    50,
+    18,   nil,   nil,   nil,    52,    55,    52,    55,    56,   nil,
+    56,    49,    10,    59,   nil,   nil,    60,    61,    61,    60,
+   nil,    63,    64,    65,   nil,    66,    63,   nil,   nil,   nil,
+    22,   nil,    67,   nil,    70,    71,   nil,    13,   nil ]
 
 racc_action_default = [
-   -51,   -51,    -1,    -2,    -3,    -4,    -5,    -6,    -7,    -8,
-    -9,   -10,   -11,   -12,   -14,   -51,   -51,   -37,   -39,   -51,
-   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -15,   -16,   -47,
-   -51,   -51,   -51,   -38,   -51,   -51,   -42,   -43,   -44,   -45,
-   -46,    94,   -51,   -51,   -51,   -51,   -51,   -51,   -40,   -41,
-   -51,   -48,   -51,   -23,   -30,   -51,   -27,   -34,   -35,   -51,
-   -51,   -18,   -20,   -21,   -24,   -51,   -51,   -28,   -51,   -36,
-   -51,   -51,   -51,   -25,   -31,   -32,   -29,   -51,   -51,   -51,
-   -19,   -51,   -51,   -51,   -13,   -51,   -22,   -26,   -33,   -51,
-   -49,   -17,   -51,   -50 ]
+   -53,   -53,    -1,    -2,    -3,    -4,    -5,    -6,    -7,    -8,
+    -9,   -10,   -11,   -12,   -14,   -53,   -53,   -39,   -41,   -53,
+   -53,   -53,   -53,   -53,   -53,   -53,   -53,   -15,   -16,   -49,
+   -53,   -53,   -53,   -40,   -53,   -53,   -44,   -45,   -46,   -47,
+   -48,    99,   -53,   -53,   -53,   -53,   -53,   -53,   -42,   -43,
+   -53,   -50,   -53,   -25,   -32,   -53,   -29,   -36,   -37,   -53,
+   -53,   -20,   -22,   -23,   -26,   -53,   -53,   -30,   -53,   -38,
+   -53,   -53,   -53,   -27,   -33,   -34,   -31,   -53,   -53,   -53,
+   -21,   -53,   -53,   -53,   -13,   -53,   -19,   -24,   -28,   -35,
+   -53,   -51,   -53,   -17,   -53,   -53,   -52,   -53,   -18 ]
 
 racc_goto_table = [
-    61,    28,    53,    56,    33,    11,     5,     6,     7,     8,
-     9,    10,     4,    12,    26,     1,    60,    89,     3,     2,
-    80,    74,    32 ]
+    61,    90,    28,    53,    56,    33,    11,     6,     7,     8,
+     9,    97,    10,     5,    12,    26,     1,    86,     4,    60,
+    80,     3,     2,    74,    32 ]
 
 racc_goto_check = [
-    17,    14,    18,    18,    14,    11,     5,     6,     7,     8,
-     9,    10,     4,    12,    13,     1,    15,    16,     3,     2,
-    17,    19,    20 ]
+    18,    16,    14,    19,    19,    14,    11,     6,     7,     8,
+     9,    16,    10,     5,    12,    13,     1,    15,     4,    17,
+    18,     3,     2,    20,    21 ]
 
 racc_goto_pointer = [
-   nil,    15,    19,    18,    12,     6,     7,     8,     9,    10,
-    11,     5,    13,     0,   -13,   -36,   -68,   -52,   -43,   -44,
-     5 ]
+   nil,    16,    22,    21,    18,    13,     7,     8,     9,    10,
+    12,     6,    14,     1,   -12,   -62,   -84,   -33,   -52,   -42,
+   -42,     7 ]
 
 racc_goto_default = [
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,    54,
-   nil ]
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+    54,   nil ]
 
 racc_reduce_table = [
   0, 0, :racc_error,
@@ -212,44 +214,46 @@ racc_reduce_table = [
   0, 43, :_reduce_14,
   1, 43, :_reduce_15,
   1, 43, :_reduce_none,
-  10, 33, :_reduce_17,
-  1, 45, :_reduce_18,
-  3, 45, :_reduce_19,
-  1, 47, :_reduce_none,
-  1, 47, :_reduce_none,
-  8, 34, :_reduce_22,
-  4, 34, :_reduce_23,
-  5, 34, :_reduce_24,
-  6, 34, :_reduce_25,
-  8, 35, :_reduce_26,
-  4, 35, :_reduce_27,
-  5, 35, :_reduce_28,
-  6, 35, :_reduce_29,
-  1, 48, :_reduce_30,
-  3, 48, :_reduce_31,
-  3, 49, :_reduce_32,
-  8, 36, :_reduce_33,
-  4, 36, :_reduce_34,
-  4, 36, :_reduce_35,
-  5, 36, :_reduce_36,
-  0, 50, :_reduce_37,
-  1, 50, :_reduce_none,
-  1, 37, :_reduce_39,
-  3, 38, :_reduce_40,
-  3, 39, :_reduce_41,
-  2, 40, :_reduce_42,
-  2, 40, :_reduce_43,
-  2, 41, :_reduce_44,
-  2, 42, :_reduce_45,
-  2, 42, :_reduce_46,
-  1, 44, :_reduce_47,
-  3, 44, :_reduce_48,
-  1, 46, :_reduce_49,
-  3, 46, :_reduce_50 ]
+  3, 45, :_reduce_17,
+  5, 45, :_reduce_18,
+  8, 33, :_reduce_19,
+  1, 47, :_reduce_20,
+  3, 47, :_reduce_21,
+  1, 48, :_reduce_none,
+  1, 48, :_reduce_none,
+  8, 34, :_reduce_24,
+  4, 34, :_reduce_25,
+  5, 34, :_reduce_26,
+  6, 34, :_reduce_27,
+  8, 35, :_reduce_28,
+  4, 35, :_reduce_29,
+  5, 35, :_reduce_30,
+  6, 35, :_reduce_31,
+  1, 49, :_reduce_32,
+  3, 49, :_reduce_33,
+  3, 50, :_reduce_34,
+  8, 36, :_reduce_35,
+  4, 36, :_reduce_36,
+  4, 36, :_reduce_37,
+  5, 36, :_reduce_38,
+  0, 51, :_reduce_39,
+  1, 51, :_reduce_none,
+  1, 37, :_reduce_41,
+  3, 38, :_reduce_42,
+  3, 39, :_reduce_43,
+  2, 40, :_reduce_44,
+  2, 40, :_reduce_45,
+  2, 41, :_reduce_46,
+  2, 42, :_reduce_47,
+  2, 42, :_reduce_48,
+  1, 44, :_reduce_49,
+  3, 44, :_reduce_50,
+  1, 46, :_reduce_51,
+  3, 46, :_reduce_52 ]
 
-racc_reduce_n = 51
+racc_reduce_n = 53
 
-racc_shift_n = 94
+racc_shift_n = 99
 
 racc_token_table = {
   false => 0,
@@ -262,12 +266,12 @@ racc_token_table = {
   "=" => 7,
   :VALUE => 8,
   "*" => 9,
-  :INSERT => 10,
-  :INTO => 11,
-  "(" => 12,
-  ")" => 13,
-  :VALUES => 14,
-  "," => 15,
+  "(" => 10,
+  ")" => 11,
+  "," => 12,
+  :INSERT => 13,
+  :INTO => 14,
+  :VALUES => 15,
   :UPDATE => 16,
   :SET => 17,
   :ADD => 18,
@@ -314,12 +318,12 @@ Racc_token_to_s_table = [
   "\"=\"",
   "VALUE",
   "\"*\"",
-  "INSERT",
-  "INTO",
   "\"(\"",
   "\")\"",
-  "VALUES",
   "\",\"",
+  "INSERT",
+  "INTO",
+  "VALUES",
   "UPDATE",
   "SET",
   "ADD",
@@ -349,8 +353,9 @@ Racc_token_to_s_table = [
   "desc_stmt",
   "get_output_list",
   "identifier_list",
-  "insert_identifier_list",
+  "value_list_list",
   "value_list",
+  "insert_identifier_list",
   "itemname_identifier",
   "set_clause_list",
   "set_clause",
@@ -416,67 +421,67 @@ module_eval(<<'.,.,', 'sdb-parser.y', 30)
 
 module_eval(<<'.,.,', 'sdb-parser.y', 36)
   def _reduce_17(val, _values)
-                      unless val[4].length == val[8].length
-                    raise Racc::ParseError, 'The number of an attribute and values differs'
+                          [val[1]]
+                    
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 40)
+  def _reduce_18(val, _values)
+                          val[0] + [val[3]]
+                    
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 45)
+  def _reduce_19(val, _values)
+                      items = val[7].map do |vals|
+                    unless val[4].length == vals.length
+                      raise Racc::ParseError, 'The number of an attribute and values differs'
+                    end
+
+                    attrs = {}
+                    val[4].zip(vals).each {|k, v| attrs[k] = v }
+                    item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
+
+                    unless item_name
+                      raise Racc::ParseError,'itemName is not contained in the INSERT statement'
+                    end
+
+                    attrs.delete(item_name[0])
+                    item_name = item_name[1]
+
+                    [item_name, attrs]
                   end
 
-                  attrs = {}
-                  val[4].zip(val[8]).each {|k, v| attrs[k] = v }
-                  item_name = attrs.find {|k, v| k =~ /\AitemName\Z/i }
-
-                  unless item_name
-                    raise Racc::ParseError,'itemName is not contained in the INSERT statement'
-                  end
-
-                  attrs.delete(item_name[0])
-                  item_name = item_name[1]
-
-                  struct(:INSERT, :domain => val[2], :item_name => item_name, :attrs => attrs)
+                  struct(:INSERT, :domain => val[2], :items => items)
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 57)
-  def _reduce_18(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 69)
+  def _reduce_20(val, _values)
                                  [val[0]]
                            
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 61)
-  def _reduce_19(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 73)
+  def _reduce_21(val, _values)
                                  val[0] + [val[2]]
                            
   end
 .,.,
 
-# reduce 20 omitted
+# reduce 22 omitted
 
-# reduce 21 omitted
-
-module_eval(<<'.,.,', 'sdb-parser.y', 69)
-  def _reduce_22(val, _values)
-                      attrs = {}
-                  val[3].each {|k, v| attrs[k] = v }
-                  struct(:UPDATE, :domain => val[1], :items => [[val[7], attrs]])
-                
-  end
-.,.,
-
-module_eval(<<'.,.,', 'sdb-parser.y', 75)
-  def _reduce_23(val, _values)
-                      attrs = {}
-                  val[3].each {|k, v| attrs[k] = v }
-                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
-                
-  end
-.,.,
+# reduce 23 omitted
 
 module_eval(<<'.,.,', 'sdb-parser.y', 81)
   def _reduce_24(val, _values)
                       attrs = {}
                   val[3].each {|k, v| attrs[k] = v }
-                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+                  struct(:UPDATE, :domain => val[1], :items => [[val[7], attrs]])
                 
   end
 .,.,
@@ -485,26 +490,26 @@ module_eval(<<'.,.,', 'sdb-parser.y', 87)
   def _reduce_25(val, _values)
                       attrs = {}
                   val[3].each {|k, v| attrs[k] = v }
-                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 94)
+module_eval(<<'.,.,', 'sdb-parser.y', 93)
   def _reduce_26(val, _values)
-                     attrs = {}
-                 val[3].each {|k, v| attrs[k] = v }
-                 struct(:MERGE, :domain => val[1], :items => [[val[7], attrs]])
-               
+                      attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 100)
+module_eval(<<'.,.,', 'sdb-parser.y', 99)
   def _reduce_27(val, _values)
-                     attrs = {}
-                 val[3].each {|k, v| attrs[k] = v }
-                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
-               
+                      attrs = {}
+                  val[3].each {|k, v| attrs[k] = v }
+                  @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
+                
   end
 .,.,
 
@@ -512,7 +517,7 @@ module_eval(<<'.,.,', 'sdb-parser.y', 106)
   def _reduce_28(val, _values)
                      attrs = {}
                  val[3].each {|k, v| attrs[k] = v }
-                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+                 struct(:MERGE, :domain => val[1], :items => [[val[7], attrs]])
                
   end
 .,.,
@@ -521,148 +526,166 @@ module_eval(<<'.,.,', 'sdb-parser.y', 112)
   def _reduce_29(val, _values)
                      attrs = {}
                  val[3].each {|k, v| attrs[k] = v }
+                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => '')
+               
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 118)
+  def _reduce_30(val, _values)
+                     attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
+                 @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE ')
+               
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 124)
+  def _reduce_31(val, _values)
+                     attrs = {}
+                 val[3].each {|k, v| attrs[k] = v }
                  @stmt_with_expr = struct(:MERGE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 119)
-  def _reduce_30(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 131)
+  def _reduce_32(val, _values)
                           [val[0]]
                     
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 123)
-  def _reduce_31(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 135)
+  def _reduce_33(val, _values)
                           val[0] + [val[2]]
                     
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 128)
-  def _reduce_32(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 140)
+  def _reduce_34(val, _values)
                      [val[0], val[2]]
                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 133)
-  def _reduce_33(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 145)
+  def _reduce_35(val, _values)
                       struct(:DELETE, :domain => val[3], :items => [[val[7], val[1]]])
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 137)
-  def _reduce_34(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 149)
+  def _reduce_36(val, _values)
                       @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => '')
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 141)
-  def _reduce_35(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 153)
+  def _reduce_37(val, _values)
                       @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE ')
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 145)
-  def _reduce_36(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 157)
+  def _reduce_38(val, _values)
                       @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE itemName')
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 150)
-  def _reduce_37(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 162)
+  def _reduce_39(val, _values)
                            []
                      
   end
 .,.,
 
-# reduce 38 omitted
+# reduce 40 omitted
 
-module_eval(<<'.,.,', 'sdb-parser.y', 156)
-  def _reduce_39(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 168)
+  def _reduce_41(val, _values)
                       struct(:SELECT, :query => val[0])
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 161)
-  def _reduce_40(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 173)
+  def _reduce_42(val, _values)
                       struct(:CREATE, :domain => val[2])
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 166)
-  def _reduce_41(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 178)
+  def _reduce_43(val, _values)
                     struct(:DROP, :domain => val[2])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 171)
-  def _reduce_42(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 183)
+  def _reduce_44(val, _values)
                     struct(:SHOW, :operand => :domains)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 175)
-  def _reduce_43(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 187)
+  def _reduce_45(val, _values)
                     struct(:SHOW, :operand => :regions)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 179)
-  def _reduce_44(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 191)
+  def _reduce_46(val, _values)
                    struct(:USE, :endpoint => val[1])
              
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 183)
-  def _reduce_45(val, _values)
-                    struct(:DESCRIBE, :domain => val[1])
-              
-  end
-.,.,
-
-module_eval(<<'.,.,', 'sdb-parser.y', 187)
-  def _reduce_46(val, _values)
-                    struct(:DESCRIBE, :domain => val[1])
-              
-  end
-.,.,
-
-module_eval(<<'.,.,', 'sdb-parser.y', 192)
+module_eval(<<'.,.,', 'sdb-parser.y', 195)
   def _reduce_47(val, _values)
+                    struct(:DESCRIBE, :domain => val[1])
+              
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 199)
+  def _reduce_48(val, _values)
+                    struct(:DESCRIBE, :domain => val[1])
+              
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sdb-parser.y', 204)
+  def _reduce_49(val, _values)
                          [val[0]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 196)
-  def _reduce_48(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 208)
+  def _reduce_50(val, _values)
                          val[0] + [val[2]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 201)
-  def _reduce_49(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 213)
+  def _reduce_51(val, _values)
                      [val[0]]
                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 205)
-  def _reduce_50(val, _values)
+module_eval(<<'.,.,', 'sdb-parser.y', 217)
+  def _reduce_52(val, _values)
                      [val[0], val[2]].flatten
                
   end

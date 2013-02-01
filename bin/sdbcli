@@ -172,7 +172,7 @@ DROP DOMAIN domain_name
 GET [attr_list] FROM domain_name WHERE itemName = '...'
   gets the attribute of an item
 
-INSERT INTO domain_name (itemName, attr1, ...) VALUES ('name', 'val1', ...)
+INSERT INTO domain_name (itemName, attr1, ...) VALUES ('name1', 'val1', ...), ('name2', 'val1', ...)...
   creates an item
 
 UPDATE domain_name {SET|ADD} attr1 = 'val1', ... WHERE itemName = '...'
