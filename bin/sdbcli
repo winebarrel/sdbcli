@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
-Version = '0.4.4'
+Version = '0.4.5'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 HISTSIZE = 500
 
@@ -244,8 +244,8 @@ while buf = Readline.readline(prompt, true)
     elsif r =~ 'exit' or r =~ 'quit'
       exit
     elsif r =~ 'format'
-      case arg
-      when nil
+      case (arg || '').strip
+      when ''
         puts $format
       when 'yaml'
         $format = :yaml
