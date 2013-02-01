@@ -175,8 +175,8 @@ GET [attr_list] FROM domain_name WHERE itemName = '...'
 INSERT INTO domain_name (itemName, attr1, ...) VALUES ('name', 'val1', ...)
   creates an item
 
-UPDATE domain_name {SET|ADD} = 'val1', ... WHERE itemName = '...'
-UPDATE domain_name {SET|ADD} = 'val1', ... [WHERE expression] [sort_instructions] [LIMIT limit]
+UPDATE domain_name {SET|ADD} attr1 = 'val1', ... WHERE itemName = '...'
+UPDATE domain_name {SET|ADD} attr1 = 'val1', ... [WHERE expression] [sort_instructions] [LIMIT limit]
   updates an item
 
 DELETE [attr1, ...] FROM domain_name WHERE itemName = '...'
