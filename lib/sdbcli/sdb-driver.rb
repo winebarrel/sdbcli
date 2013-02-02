@@ -44,9 +44,9 @@ module SimpleDB
 
     # attr action
 
-    def insert(domain_name, items = {}, consistent = false)
+    def insert(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
-        params = {:ConsistentRead => consistent}
+        params = {}
         i = j = 0
 
         chunk.each do |item_name, attrs|
@@ -67,9 +67,9 @@ module SimpleDB
       end
     end
 
-    def update(domain_name, items = {}, consistent = false)
+    def update(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
-        params = {:ConsistentRead => consistent}
+        params = {}
         i = j = 0
 
         chunk.each do |item_name, attrs|
@@ -110,9 +110,8 @@ module SimpleDB
       return items
     end
 
-    def delete(domain_name, items = {}, consistent = false)
+    def delete(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
-        params = {:ConsistentRead => consistent}
         i = j = 0
 
         chunk.each do |item_name, attrs|

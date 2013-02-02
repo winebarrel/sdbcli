@@ -34,13 +34,13 @@ module SimpleDB
       REGIONS[endpoint]
     end
 
-    def execute(query, inline = true)
+    def execute(query, inline = true, consistent = false)
       parsed = Parser.parse(query)
       command = parsed.class.name.split('::').last.to_sym
 
       case command
       when :GET
-        item = @driver.get(parsed.domain, parsed.item_name, parsed.attr_names)
+        item = @driver.get(parsed.domain, parsed.item_name, parsed.attr_names, consistent)
 
         if inline
           def item.to_yaml_style; :inline; end
@@ -57,7 +57,7 @@ module SimpleDB
         rownum
       when :UPDATE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
-        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.update(parsed.domain, items)
         rownum
@@ -67,7 +67,7 @@ module SimpleDB
         rownum
       when :MERGE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
-        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.insert(parsed.domain, items)
         rownum
@@ -77,12 +77,12 @@ module SimpleDB
         rownum
       when :DELETE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
-        items = @driver.select(query).map {|i| [i[0], parsed.attrs] }
+        items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.delete(parsed.domain, items)
         rownum
       when :SELECT
-        items = @driver.select(parsed.query)
+        items = @driver.select(parsed.query, consistent)
 
         if inline
           items.each do |item|
