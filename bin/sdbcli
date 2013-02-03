@@ -112,7 +112,17 @@ def execute(src, show_rows = false)
         when :yaml
           str = YAML.dump(out)
         when :json
-          str = JSON.pretty_generate(out)
+          if out.kind_of?(Array) and inline
+            str = "[\n"
+            out.each_with_index do |item, i|
+              str << "  #{JSON.generate(item)}"
+              str << ',' if i < (out.length - 1)
+              str << "\n"
+            end
+            str << "]"
+          else
+            str = JSON.pretty_generate(out)
+          end
         else
           output_error('Unknown format')
         end
