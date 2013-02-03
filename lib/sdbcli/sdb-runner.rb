@@ -16,6 +16,8 @@ module SimpleDB
     }
 
   class Runner
+    attr_reader :driver
+
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
       endpoint = region_to_endpoint(endpoint)
       @driver = Driver.new(accessKeyId, secretAccessKey, endpoint)

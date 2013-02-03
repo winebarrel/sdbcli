@@ -4,6 +4,7 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 Version = '1.0.1'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 HISTSIZE = 500
+SELECT_LIMIT = 2500
 
 require 'rubygems'
 require 'sdbcli'
@@ -21,6 +22,8 @@ sdb_endpoint      = ENV['SDB_ENDPOINT'] || ENV['SDB_REGION'] || 'sdb.amazonaws.c
 command = nil
 $format = :yaml
 $consistent = false
+import = nil
+export = nil
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
@@ -29,6 +32,9 @@ ARGV.options do |opt|
   opt.on('-e', '--eval=COMMAND') {|v| command = v }
   opt.on('-f', '--format=YAML_OR_JSON', [:yaml, :json]) {|v| $format = v }
   opt.on('-c', '--consistent') { $consistent = true }
+  opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
+  opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
+  opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -39,16 +45,17 @@ end
 
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 
-def output_error(msg)
+def output_error(msg, strip = false)
   case $format
   when :yaml
-    msg = "# #{msg}\n\n"
+    msg = "# #{msg}"
   when :json
-    msg = "// #{msg}\n\n"
+    msg = "// #{msg}"
   else
-    msg = "# #{msg}\n\n"
+    msg = "# #{msg}"
   end
 
+  msg << "\n\n" unless strip
   $stderr.puts msg
 end
 
@@ -139,6 +146,128 @@ def execute(src, show_rows = false)
   buf
 end
 
+# export mode
+if export
+  export_domain, export_file = export
+
+  begin
+    export_file = (export_file == '-') ? $stdout : open(export_file, 'wb')
+
+    case $format
+    when :yaml
+      export_file.puts '---'
+    when :json
+      export_file.puts '['
+    else
+      raise 'must not happen'
+    end
+
+    query = "SELECT * FROM #{export_domain} "
+    query_expr = "WHERE itemName() IS NOT NULL ORDER BY itemName() LIMIT #{SELECT_LIMIT}"
+    rownum = 0
+
+    loop do
+      items = $runner.execute(query + query_expr, true, $consistent)
+      break if items.empty?
+      rownum += items.length
+
+      case $format
+      when :yaml
+        export_file.puts YAML.dump(items).sub(/\A---\s*/, '').strip
+      when :json
+        export_file.print "," if rownum > SELECT_LIMIT
+        items.each_with_index do |item, i|
+          row = JSON.generate(item)
+          row << ',' if i < (items.length - 1)
+          export_file.puts row
+        end
+      else
+        raise 'must not happen'
+      end
+
+      tail_item_name = "'" + items.last[0].gsub(/'/, "''") + "'"
+      query_expr = "WHERE itemName() > #{tail_item_name} ORDER BY itemName() LIMIT #{SELECT_LIMIT}"
+
+      output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted...", true)
+    end
+
+    output_error("total of #{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted", true)
+  rescue => e
+    output_error e.message.strip
+    exit 1
+  ensure
+    if export_file.kind_of?(IO) and export_file != $stdout and not export_file.closed?
+      export_file.close
+    end
+  end
+
+  case $format
+  when :yaml
+  when :json
+    export_file.puts ']'
+  else
+    raise 'must not happen'
+  end
+
+  exit 0
+end
+
+# import mode
+if import
+  import_domain, import_file, import_as_replace = import
+
+  unless import_file == '-' or File.exist?(import_file)
+    output_error("No such file: #{import_file}")
+    exit 1
+  end
+
+  begin
+    items = case $format
+            when :yaml
+              if import_file == '-'
+                YAML.load($stdin)
+              else
+                YAML.load_file(import_file)
+              end
+            when :json
+              if import_file == '-'
+                JSON.load($stdin)
+              else
+                open(import_file) {|f| JSON.load(f) }
+              end
+            else
+              raise 'must not happen'
+            end
+
+    unless items.kind_of?(Array)
+      output_error('Route object is not Array')
+      exit 1
+    end
+
+    rownum = 0
+
+    while (chunk = items.slice!(0, SELECT_LIMIT))
+      rownum += chunk.length
+
+      if import_as_replace
+        $runner.driver.update(import_domain, chunk)
+      else
+        $runner.driver.insert(import_domain, chunk)
+      end
+
+      output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted...", true)
+    end
+
+    output_error("total of #{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted", true)
+
+    exit 0
+  rescue => e
+    output_error e.message.strip
+    exit 1
+  end
+end
+
+# eval mode
 if not $stdin.tty? or command
   src = command || $stdin.read.strip
 
