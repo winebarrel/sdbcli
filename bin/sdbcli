@@ -24,7 +24,7 @@ $format = :yaml
 $consistent = false
 import = nil
 export = nil
-export_retry = 3
+import_export_retry = 3
 timeout = 60
 
 ARGV.options do |opt|
@@ -38,7 +38,7 @@ ARGV.options do |opt|
   opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
   opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
-  opt.on(''  , '--export-retry=NUM', Integer) {|v| export_retry = v.to_i }
+  opt.on(''  , '--retry=NUM', Integer) {|v| import_export_retry = v.to_i }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -184,12 +184,12 @@ if export
     loop do
       items = nil
 
-      export_retry.times do |i|
+      import_export_retry.times do |i|
         begin
           items = $runner.execute(query + query_expr, true, $consistent)
           break
         rescue Timeout::Error => e
-          raise e if i >= (export_retry - 1)
+          raise e if i >= (import_export_retry - 1)
         end
 
         output_error("Retry...", true)
@@ -281,10 +281,20 @@ if import
     until (chunk = items.slice!(0, SELECT_LIMIT)).empty?
       rownum += chunk.length
 
-      if import_as_replace
-        $runner.driver.update(import_domain, chunk)
-      else
-        $runner.driver.insert(import_domain, chunk)
+      import_export_retry.times do |i|
+        begin
+          if import_as_replace
+            $runner.driver.update(import_domain, chunk)
+          else
+            $runner.driver.insert(import_domain, chunk)
+          end
+
+          break
+        rescue Timeout::Error => e
+          raise e if i >= (import_export_retry - 1)
+        end
+
+        output_error("Retry...", true)
       end
 
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted...", true)
