@@ -312,9 +312,9 @@ if import
       until (batch_chunk = chunk.slice!(0, BATCH_ATTRS_LIMIT)).empty?
         retry_api_call do
           if import_as_replace
-            $runner.driver.update(import_domain, batch_chunk)
+            $runner.driver.update(import_domain, batch_chunk.dup)
           else
-            $runner.driver.insert(import_domain, batch_chunk)
+            $runner.driver.insert(import_domain, batch_chunk.dup)
           end
         end
       end
