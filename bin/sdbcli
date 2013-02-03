@@ -88,6 +88,8 @@ def execute(src, show_rows = false)
       # nothing to do
     elsif (tok = ss.scan /#[^\r\n]*(?:\r\n|\r|\n|\Z)/)
       # nothing to do
+    elsif (tok = ss.scan /(?:\\;)/)
+      buf << ';'
     elsif (tok = ss.scan /(?:;|\\G)/)
       src.replace(ss.rest)
       query = buf

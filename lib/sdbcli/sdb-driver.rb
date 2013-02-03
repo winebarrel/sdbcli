@@ -120,6 +120,7 @@ module SimpleDB
 
     def delete(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
+        params = {}
         i = j = 0
 
         chunk.each do |item_name, attrs|
