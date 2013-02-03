@@ -148,7 +148,11 @@ module SimpleDB
         end
 
         if parsed.ruby
-          items = items.instance_eval(parsed.ruby.strip)
+          begin
+            items = items.instance_eval(parsed.ruby.strip)
+          rescue SyntaxError => e
+            raise e.message
+          end
         end
 
         if inline and items.kind_of?(Array)
