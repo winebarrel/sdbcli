@@ -32,6 +32,14 @@ module SimpleDB
       @driver.endpoint = v
     end
 
+    def timeout
+      @driver.timeout
+    end
+
+    def timeout=(v)
+      @driver.timeout = v
+    end
+
     def region
       REGIONS[endpoint]
     end

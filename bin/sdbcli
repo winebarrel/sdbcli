@@ -24,6 +24,7 @@ $format = :yaml
 $consistent = false
 import = nil
 export = nil
+timeout = 60
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
@@ -32,6 +33,7 @@ ARGV.options do |opt|
   opt.on('-e', '--eval=COMMAND') {|v| command = v }
   opt.on('-f', '--format=YAML_OR_JSON', [:yaml, :json]) {|v| $format = v }
   opt.on('-c', '--consistent') { $consistent = true }
+  opt.on('-t', '--timeout=TIMEOUT', Integer) {|v| timeout = v.to_i }
   opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
   opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
@@ -44,6 +46,7 @@ ARGV.options do |opt|
 end
 
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
+$runner.timeout = timeout
 
 def output_error(msg, strip = false)
   case $format
@@ -341,6 +344,7 @@ USE region_or_endpoint
 .quit | .exit              exits sdbcli
 .format     (yaml|json)?   displays a format or changes it
 .consistent (true|false)?  displays ConsistentRead parameter or changes it
+.timeout    TIMEOUT        displays a timeout second or changes it
 .version                   displays a version
 
     EOS
@@ -404,6 +408,15 @@ while buf = Readline.readline(prompt, true)
         $consistent = true
       when 'false'
         $consistent = false
+      else
+        output_error('Invalid argument')
+      end
+    elsif r =~ 'timeout'
+      case (arg || '').strip
+      when ''
+        puts $runner.timeout
+      when /\d+/
+        $runner.timeout = arg.to_i
       else
         output_error('Invalid argument')
       end

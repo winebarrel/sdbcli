@@ -20,6 +20,14 @@ module SimpleDB
       @client.endpoint = v
     end
 
+    def timeout
+      @client.timeout
+    end
+
+    def timeout=(v)
+      @client.timeout = v
+    end
+
     # domain action
 
     def create_domain(domain_name)

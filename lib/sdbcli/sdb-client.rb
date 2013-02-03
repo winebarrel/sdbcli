@@ -13,11 +13,13 @@ module SimpleDB
     SIGNATURE_ALGORITHM = :SHA256
 
     attr_accessor :endpoint
+    attr_accessor :timeout
 
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
       @accessKeyId = accessKeyId
       @secretAccessKey = secretAccessKey
       @endpoint = endpoint
+      @timeout = 60
     end
 
     # domain action
@@ -92,6 +94,8 @@ module SimpleDB
       https = Net::HTTP.new(@endpoint, 443)
       https.use_ssl = true
       https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      https.open_timeout = @timeout
+      https.read_timeout = @timeout
 
       doc = https.start do |w|
         req = Net::HTTP::Post.new('/',
