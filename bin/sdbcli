@@ -26,7 +26,7 @@ $format = :yaml
 $consistent = false
 import = nil
 export = nil
-$import_export_retry = 3
+$request_retry = 3
 $retry_interval = 3
 timeout = 60
 iteratable = false
@@ -42,7 +42,7 @@ ARGV.options do |opt|
   opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
   opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
-  opt.on(''  , '--retry=NUM', Integer) {|v| $import_export_retry = v.to_i }
+  opt.on(''  , '--retry=NUM', Integer) {|v| $request_retry = v.to_i }
   opt.on(''  , '--retry-interval=SECOND', Integer) {|v| $retry_interval = v.to_i }
   opt.on(''  , '--require=FILE_LIST', Array) {|v| v.each {|i| require i} }
   opt.on(''  , '--iteratable') { iteratable = true }
@@ -177,20 +177,20 @@ def execute(src, show_rows = false)
 end
 
 def retry_api_call
-  ($import_export_retry + 1).times do |i|
+  ($request_retry + 1).times do |i|
     begin
       yield
       break
     rescue Errno::ETIMEDOUT => e
-      raise e if i >= $import_export_retry
+      raise e if i >= $request_retry
     rescue SimpleDB::Error => e
       if /\AServiceUnavailable:/ =~ e.message
-        raise e if i >= $import_export_retry
+        raise e if i >= $request_retry
       else
         raise e
       end
     rescue Timeout::Error => e
-      raise e if i >= $import_export_retry
+      raise e if i >= $request_retry
     end
 
     wait_sec = $retry_interval * (i + 1)
