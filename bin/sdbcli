@@ -24,6 +24,7 @@ $format = :yaml
 $consistent = false
 import = nil
 export = nil
+export_retry = 3
 timeout = 60
 
 ARGV.options do |opt|
@@ -33,10 +34,11 @@ ARGV.options do |opt|
   opt.on('-e', '--eval=COMMAND') {|v| command = v }
   opt.on('-f', '--format=YAML_OR_JSON', [:yaml, :json]) {|v| $format = v }
   opt.on('-c', '--consistent') { $consistent = true }
-  opt.on('-t', '--timeout=TIMEOUT', Integer) {|v| timeout = v.to_i }
+  opt.on('-t', '--timeout=SECOND', Integer) {|v| timeout = v.to_i }
   opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
   opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
+  opt.on(''  , '--export-retry=NUM', Integer) {|v| export_retry = v.to_i }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -180,7 +182,19 @@ if export
     rownum = 0
 
     loop do
-      items = $runner.execute(query + query_expr, true, $consistent)
+      items = nil
+
+      export_retry.times do |i|
+        begin
+          items = $runner.execute(query + query_expr, true, $consistent)
+          break
+        rescue Timeout::Error => e
+          raise e if i >= (export_retry - 1)
+        end
+
+        output_error("Retry...", true)
+      end
+
       break if items.empty?
       rownum += items.length
 
@@ -204,14 +218,10 @@ if export
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted...", true)
     end
 
-    output_error("total of #{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted", true)
+    output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was processed", true)
   rescue => e
     output_error e.message.strip
     exit 1
-  ensure
-    if export_file.kind_of?(IO) and export_file != $stdout and not export_file.closed?
-      export_file.close
-    end
   end
 
   case $format
@@ -220,6 +230,15 @@ if export
     export_file.puts ']'
   else
     raise 'must not happen'
+  end
+
+  begin
+    if export_file.kind_of?(IO) and export_file != $stdout and not export_file.closed?
+      export_file.close
+    end
+  rescue => e
+    output_error e.message.strip
+    exit 1
   end
 
   exit 0
@@ -259,7 +278,7 @@ if import
 
     rownum = 0
 
-    while (chunk = items.slice!(0, SELECT_LIMIT))
+    until (chunk = items.slice!(0, SELECT_LIMIT)).empty?
       rownum += chunk.length
 
       if import_as_replace
@@ -271,7 +290,7 @@ if import
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted...", true)
     end
 
-    output_error("total of #{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted", true)
+    output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was processed", true)
 
     exit 0
   rescue => e
@@ -344,7 +363,7 @@ USE region_or_endpoint
 .quit | .exit              exits sdbcli
 .format     (yaml|json)?   displays a format or changes it
 .consistent (true|false)?  displays ConsistentRead parameter or changes it
-.timeout    TIMEOUT        displays a timeout second or changes it
+.timeout    SECOND         displays a timeout second or changes it
 .version                   displays a version
 
     EOS
