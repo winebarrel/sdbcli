@@ -10,6 +10,8 @@ module SimpleDB
 
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
       @client = Client.new(accessKeyId, secretAccessKey, endpoint)
+      @select_expr = nil
+      @next_token = nil
     end
 
     def endpoint
@@ -105,11 +107,33 @@ module SimpleDB
       attrs_to_hash(doc)
     end
 
-    def select(expr, consistent = false)
+    def select(expr, consistent = false, persist = false)
       params = {:SelectExpression => expr, :ConsistentRead => consistent}
       items = []
 
-      iterate(:select, params) do |doc|
+      token = iterate(:select, params) do |doc|
+        doc.css('Item').map do |i|
+          items << [i.at_css('Name').content, attrs_to_hash(i)]
+        end
+      end
+
+      if persist
+        @select_expr = expr
+        @next_token = token
+      end
+
+      return items
+    end
+
+    def next_list(consistent = false)
+      unless @select_expr and @next_token
+        return []
+      end
+
+      params = {:SelectExpression => @select_expr, :ConsistentRead => consistent}
+      items = []
+
+      @next_token = iterate(:select, params, @next_token) do |doc|
         doc.css('Item').map do |i|
           items << [i.at_css('Name').content, attrs_to_hash(i)]
         end
@@ -172,33 +196,38 @@ module SimpleDB
       return h
     end
 
-    def iterate(method, params = {})
-      Iterator.new(@client, method, params, @iteratable).each do |doc|
+    def iterate(method, params = {}, token = :first)
+      Iterator.new(@client, method, params, @iteratable, token).each do |doc|
         yield(doc)
       end
     end
 
     class Iterator
-      def initialize(client, method, params = {}, iteratable = false)
+      def initialize(client, method, params = {}, iteratable = false, token = :first)
         @client = client
         @method = method
         @params = params.dup
-        @token = :first
+        @token = token
         @iteratable = iteratable
       end
 
       def each
+        token = nil
+
         while @token
           @params.update(:NextToken => @token.content) if @token != :first
           doc = @client.send(@method, @params)
           yield(doc)
+          token = doc.at_css('NextToken')
 
           if @iteratable
-            @token = doc.at_css('NextToken')
+            @token = token
           else
             @token = nil
           end
         end
+
+        return token
       end
     end # Iterator
   end # Driver

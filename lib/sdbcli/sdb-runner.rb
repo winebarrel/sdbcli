@@ -124,8 +124,15 @@ module SimpleDB
         rownum = items.length
         @driver.delete(parsed.domain, items)
         Rownum.new(rownum)
-      when :SELECT
-        items = @driver.select(parsed.query, consistent)
+      when :SELECT, :NEXT
+        items = case command
+                when :SELECT
+                  @driver.select(parsed.query, consistent, true)
+                when :NEXT
+                  @driver.next_list(consistent)
+                else
+                  raise 'must not happen'
+                end
 
         def items.method_missing(method_name)
           case method_name.to_s
