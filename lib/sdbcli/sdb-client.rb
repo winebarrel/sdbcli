@@ -3,6 +3,8 @@ require 'base64'
 require 'net/https'
 require 'openssl'
 require 'nokogiri'
+require 'stringio'
+require 'zlib'
 
 module SimpleDB
   class Error < StandardError; end
@@ -100,13 +102,23 @@ module SimpleDB
       doc = https.start do |w|
         req = Net::HTTP::Post.new('/',
           'Host' => @endpoint,
-          'Content-Type' => 'application/x-www-form-urlencoded'
+          'Content-Type' => 'application/x-www-form-urlencoded',
+          'Accept-Encoding' => 'gzip'
         )
 
         req.set_form_data(params)
         res = w.request(req)
+        body = nil
 
-        Nokogiri::XML(res.body)
+        if res['Content-Encoding'] == 'gzip'
+          StringIO.open(res.body, 'rb') do |f|
+            body = Zlib::GzipReader.wrap(f).read
+          end
+        else
+          body = res.bod
+        end
+
+        Nokogiri::XML(body)
       end
 
       validate(doc)
