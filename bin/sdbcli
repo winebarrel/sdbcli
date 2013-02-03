@@ -16,6 +16,7 @@ require 'strscan'
 require 'syck' if /\A1\.9/ =~ RUBY_VERSION
 require 'yaml'
 require 'json'
+require 'time'
 
 access_key_id     = ENV['AWS_ACCESS_KEY_ID']
 secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
@@ -72,7 +73,7 @@ def execute(src, show_rows = false)
   buf = ''
 
   until ss.eos?
-    if (tok = ss.scan %r{[^-`'";\\/#]+})
+    if (tok = ss.scan %r{[^-`'";\\/#]+}) #'
       buf << tok
     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
       buf << tok

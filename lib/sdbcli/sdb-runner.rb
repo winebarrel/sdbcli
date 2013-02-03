@@ -1,6 +1,29 @@
 require 'sdbcli/sdb-driver'
 require 'sdbcli/sdb-parser.tab'
 
+# XXX:
+class Array
+  def to_s
+    self.map {|i| i.to_s }
+  end
+
+  def to_i
+    self.map {|i| i.to_i }
+  end
+
+  def to_f
+    self.map {|i| i.to_f }
+  end
+
+  def sum
+    self.inject {|r, i| r + i }
+  end
+
+  def avg
+    self.sum / self.length
+  end
+end
+
 module SimpleDB
   class Error < StandardError; end
 
@@ -104,9 +127,35 @@ module SimpleDB
       when :SELECT
         items = @driver.select(parsed.query, consistent)
 
-        if inline
+        def items.method_missing(method_name)
+          case method_name.to_s
+          when /itemName/i
+            self.map {|i| i[0] }
+          else
+            self.map {|i| i[1][method_name.to_s] }
+          end
+        end
+
+        items.each do |item|
+          def item.method_missing(method_name)
+            case method_name.to_s
+            when /itemName/i
+              self[0]
+            else
+              self[1][method_name.to_s]
+            end
+          end
+        end
+
+        if parsed.ruby
+          items = items.instance_eval(parsed.ruby.strip)
+        end
+
+        if inline and items.kind_of?(Array)
           items.each do |item|
-            def item.to_yaml_style; :inline; end
+            if item.kind_of?(Array)
+              def item.to_yaml_style; :inline; end
+            end
           end
         end
 

@@ -166,7 +166,28 @@ rule
 
   select_stmt : SELECT
                 {
-                  struct(:SELECT, :query => val[0])
+                  query = ''
+                  ruby = nil
+
+                  ss = StringScanner.new(val[0])
+
+                  until ss.eos?
+                    if (tok = ss.scan %r{[^-`'";\\/#|]+}) #'
+                      query << tok
+                    elsif (tok = ss.scan /`(?:[^`]|``)*`/)
+                      query << tok
+                    elsif (tok = ss.scan /'(?:[^']|'')*'/) #'
+                      query << tok
+                    elsif (tok = ss.scan /"(?:[^"]|"")*"/) #"
+                      query << tok
+                    elsif (tok = ss.scan /\|/)
+                      ruby = ss.scan_until(/\Z/)
+                    elsif (tok = ss.scan /./)
+                      query << tok
+                    end
+                  end
+
+                  struct(:SELECT, :query => query, :ruby => ruby)
                 }
 
   create_stmt : CREATE DOMAIN IDENTIFIER
