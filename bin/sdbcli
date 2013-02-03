@@ -215,15 +215,14 @@ if export
       raise 'must not happen'
     end
 
-    query = "SELECT * FROM #{export_domain} "
-    query_expr = "WHERE itemName() IS NOT NULL ORDER BY itemName() LIMIT #{SELECT_LIMIT}"
+    query = "SELECT * FROM #{export_domain} LIMIT #{SELECT_LIMIT}"
     rownum = 0
 
     loop do
       items = nil
 
       retry_api_call do
-        items = $runner.execute(query + query_expr, true, $consistent)
+        items = $runner.execute(query, true, $consistent)
       end
 
       break if items.empty?
@@ -243,8 +242,7 @@ if export
         raise 'must not happen'
       end
 
-      tail_item_name = "'" + items.last[0].gsub(/'/, "''") + "'"
-      query_expr = "WHERE itemName() > #{tail_item_name} ORDER BY itemName() LIMIT #{SELECT_LIMIT}"
+      query = 'NEXT'
 
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted...", true)
     end
