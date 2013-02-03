@@ -120,7 +120,7 @@ def execute(src, show_rows = false)
           if out.kind_of?(Array) and inline
             str = "[\n"
             out.each_with_index do |item, i|
-              str << "  #{JSON.generate(item)}"
+              str << "  #{item.to_json}"
               str << ',' if i < (out.length - 1)
               str << "\n"
             end
@@ -204,7 +204,7 @@ if export
       when :json
         export_file.print "," if rownum > SELECT_LIMIT
         items.each_with_index do |item, i|
-          row = JSON.generate(item)
+          row = item.to_json
           row << ',' if i < (items.length - 1)
           export_file.puts row
         end
