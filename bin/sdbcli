@@ -376,6 +376,7 @@ DELETE [attr1, ...] FROM domain_name WHERE [WHERE expression] [sort_instructions
   deletes the attribute of an item or an item
 
 SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit]
+SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit] [ | ruby script ]
   queries using the SELECT statement
   see http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/UsingSelect.html
 

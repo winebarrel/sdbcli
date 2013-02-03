@@ -70,7 +70,7 @@ https://bitbucket.org/winebarrel/sdbcli
   DELETE [attr1, ...] FROM domain_name WHERE [WHERE expression] [sort_instructions] [LIMIT limit]
     deletes the attribute of an item or an item
   
-  SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit]
+  SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMIT limit] [ | ruby script ]
     queries using the SELECT statement
     see http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/UsingSelect.html
   
@@ -134,3 +134,26 @@ see http://docs.amazonwebservices.com/AmazonSimpleDB/latest/DeveloperGuide/Quoti
   // 7500 rows was inputted...
 
 If '-' is specified as a file name, the input/output of data will become a standard input/output.
+
+== Pipe to ruby
+
+  ap-northeast-1> select * from employees limit 3;
+  ---
+  - ["100000", {first_name: Hiroyasu, hire_date: "1991-07-02", birth_date: "1956-01-11", last_name: Emden}]
+  - ["100001", {first_name: Jasminko, hire_date: "1994-12-25", birth_date: "1953-02-07", last_name: Antonakopoulos}]
+  - ["100002", {first_name: Claudi, hire_date: "1988-02-20", birth_date: "1957-03-04", last_name: Kolinko}]
+  # 3 rows in set
+  
+  ap-northeast-1> select * from employees limit 3 | hire_date.max;
+  --- "1994-12-25"
+  
+  ap-northeast-1> select * from employees limit 3 | hire_date.to_i;
+  ---
+  - 1991
+  - 1994
+  - 1988
+  # 3 rows in set
+  ap-northeast-1> select * from employees limit 3 | hire_date.to_f.avg;
+  --- 1991.0
+
+'sum' method and 'avg' method are added to the Array class.
