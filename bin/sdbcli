@@ -29,6 +29,7 @@ export = nil
 $import_export_retry = 3
 $retry_interval = 3
 timeout = 60
+iteratable = false
 
 ARGV.options do |opt|
   opt.on('-k', '--access-key=ACCESS_KEY') {|v| access_key_id = v }
@@ -44,6 +45,7 @@ ARGV.options do |opt|
   opt.on(''  , '--retry=NUM', Integer) {|v| $import_export_retry = v.to_i }
   opt.on(''  , '--retry-interval=SECOND', Integer) {|v| $retry_interval = v.to_i }
   opt.on(''  , '--require=FILE_LIST', Array) {|v| v.each {|i| require i} }
+  opt.on(''  , '--iteratable') { iteratable = true }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -54,6 +56,7 @@ end
 
 $runner = SimpleDB::Runner.new(access_key_id, secret_access_key, sdb_endpoint)
 $runner.timeout = timeout
+$runner.iteratable = iteratable
 
 def output_error(msg, strip = false)
   case $format
@@ -400,6 +403,8 @@ USE region_or_endpoint
 .quit | .exit              exits sdbcli
 .format     (yaml|json)?   displays a format or changes it
 .consistent (true|false)?  displays ConsistentRead parameter or changes it
+.iteratable (true|false)?  displays iteratable option or changes it
+                           all results are displayed if true
 .timeout    SECOND         displays a timeout second or changes it
 .version                   displays a version
 
@@ -464,6 +469,17 @@ while buf = Readline.readline(prompt, true)
         $consistent = true
       when 'false'
         $consistent = false
+      else
+        output_error('Invalid argument')
+      end
+    elsif r =~ 'iteratable'
+      case (arg || '').strip
+      when ''
+        puts $runner.iteratable
+      when 'true'
+        $runner.iteratable = true
+      when 'false'
+        $runner.iteratable = false
       else
         output_error('Invalid argument')
       end

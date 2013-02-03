@@ -73,6 +73,14 @@ module SimpleDB
       @driver.timeout = v
     end
 
+    def iteratable
+      @driver.iteratable
+    end
+
+    def iteratable=(v)
+      @driver.iteratable = v
+    end
+
     def region
       REGIONS[endpoint]
     end
