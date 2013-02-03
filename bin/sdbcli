@@ -43,6 +43,7 @@ ARGV.options do |opt|
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
   opt.on(''  , '--retry=NUM', Integer) {|v| $import_export_retry = v.to_i }
   opt.on(''  , '--retry-interval=SECOND', Integer) {|v| $retry_interval = v.to_i }
+  opt.on(''  , '--require=FILE_LIST', Array) {|v| v.each {|i| require i} }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
