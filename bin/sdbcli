@@ -184,12 +184,12 @@ if export
     loop do
       items = nil
 
-      import_export_retry.times do |i|
+      (import_export_retry + 1).times do |i|
         begin
           items = $runner.execute(query + query_expr, true, $consistent)
           break
         rescue Timeout::Error => e
-          raise e if i >= (import_export_retry - 1)
+          raise e if i >= import_export_retry
         end
 
         output_error("Retry...", true)
@@ -281,7 +281,7 @@ if import
     until (chunk = items.slice!(0, SELECT_LIMIT)).empty?
       rownum += chunk.length
 
-      import_export_retry.times do |i|
+      (import_export_retry + 1).times do |i|
         begin
           if import_as_replace
             $runner.driver.update(import_domain, chunk)
@@ -291,7 +291,7 @@ if import
 
           break
         rescue Timeout::Error => e
-          raise e if i >= (import_export_retry - 1)
+          raise e if i >= import_export_retry
         end
 
         output_error("Retry...", true)
