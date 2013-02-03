@@ -5,6 +5,7 @@ Version = '1.1.4'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 HISTSIZE = 500
 SELECT_LIMIT = 2500
+BATCH_ATTRS_LIMIT = 25
 
 require 'rubygems'
 require 'sdbcli'
@@ -101,7 +102,11 @@ def execute(src, show_rows = false)
         next
       end
 
-      out = $runner.execute(query, inline, $consistent)
+      out = nil
+
+      retry_api_call do
+        out = $runner.execute(query, inline, $consistent)
+      end
 
       if out.kind_of?(Integer)
         puts case $format
@@ -168,6 +173,8 @@ def retry_api_call
     begin
       yield
       break
+    rescue Errno::ETIMEDOUT => e
+      raise e if i >= $import_export_retry
     rescue SimpleDB::Error => e
       if /\AServiceUnavailable:/ =~ e.message
         raise e if i >= $import_export_retry
@@ -178,8 +185,9 @@ def retry_api_call
       raise e if i >= $import_export_retry
     end
 
-    output_error("Retry... (wait %d seconds)" % $retry_interval, true)
-    sleep $retry_interval
+    wait_sec = $retry_interval * (i + 1)
+    output_error("Retry... (wait %d seconds)" % wait_sec, true)
+    sleep wait_sec
   end
 end
 
@@ -296,11 +304,13 @@ if import
     until (chunk = items.slice!(0, SELECT_LIMIT)).empty?
       rownum += chunk.length
 
-      retry_api_call do
-        if import_as_replace
-          $runner.driver.update(import_domain, chunk)
-        else
-          $runner.driver.insert(import_domain, chunk)
+      until (batch_chunk = chunk.slice!(0, BATCH_ATTRS_LIMIT)).empty?
+        retry_api_call do
+          if import_as_replace
+            $runner.driver.update(import_domain, batch_chunk)
+          else
+            $runner.driver.insert(import_domain, batch_chunk)
+          end
         end
       end
 
