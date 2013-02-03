@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
-Version = '1.1.3'
+Version = '1.1.4'
 HISTORY_FILE = File.join((ENV['HOME'] || ENV['USERPROFILE'] || '.'), '.sdbcli_history')
 HISTSIZE = 500
 SELECT_LIMIT = 2500
@@ -24,8 +24,8 @@ $format = :yaml
 $consistent = false
 import = nil
 export = nil
-import_export_retry = 3
-retry_interval = 60
+$import_export_retry = 3
+$retry_interval = 3
 timeout = 60
 
 ARGV.options do |opt|
@@ -39,8 +39,8 @@ ARGV.options do |opt|
   opt.on(''  , '--import=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [false] }
   opt.on(''  , '--import-replace=DOMAIN,FILE') {|v| import = v.split(/\s*,\s*/, 2) + [true] }
   opt.on(''  , '--export=DOMAIN,FILE') {|v| export = v.split(/\s*,\s*/, 2) }
-  opt.on(''  , '--retry=NUM', Integer) {|v| import_export_retry = v.to_i }
-  opt.on(''  , '--retry-interval=SECOND', Integer) {|v| retry_interval = v.to_i }
+  opt.on(''  , '--retry=NUM', Integer) {|v| $import_export_retry = v.to_i }
+  opt.on(''  , '--retry-interval=SECOND', Integer) {|v| $retry_interval = v.to_i }
   opt.parse!
 
   unless access_key_id and secret_access_key and sdb_endpoint
@@ -163,6 +163,26 @@ def execute(src, show_rows = false)
   buf
 end
 
+def retry_api_call
+  ($import_export_retry + 1).times do |i|
+    begin
+      yield
+      break
+    rescue SimpleDB::Error => e
+      if /\AServiceUnavailable:/ =~ e.message
+        raise e if i >= $import_export_retry
+      else
+        raise e
+      end
+    rescue Timeout::Error => e
+      raise e if i >= $import_export_retry
+    end
+
+    output_error("Retry... (wait %d seconds)" % $retry_interval, true)
+    sleep $retry_interval
+  end
+end
+
 # export mode
 if export
   export_domain, export_file = export
@@ -186,22 +206,8 @@ if export
     loop do
       items = nil
 
-      (import_export_retry + 1).times do |i|
-        begin
-          items = $runner.execute(query + query_expr, true, $consistent)
-          break
-        rescue SimpleDB::Error => e
-          if /\AServiceUnavailable:/ =~ e.message
-            raise e if i >= import_export_retry
-          else
-            raise e
-          end
-        rescue Timeout::Error => e
-          raise e if i >= import_export_retry
-        end
-
-        output_error("Retry... (wait %d seconds)" % retry_interval, true)
-        sleep retry_interval
+      retry_api_call do
+        items = $runner.execute(query + query_expr, true, $consistent)
       end
 
       break if items.empty?
@@ -226,8 +232,6 @@ if export
 
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was outputted...", true)
     end
-
-    output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was processed", true)
   rescue => e
     output_error e.message.strip
     exit 1
@@ -240,6 +244,8 @@ if export
   else
     raise 'must not happen'
   end
+
+  output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was processed", true)
 
   begin
     if export_file.kind_of?(IO) and export_file != $stdout and not export_file.closed?
@@ -290,27 +296,12 @@ if import
     until (chunk = items.slice!(0, SELECT_LIMIT)).empty?
       rownum += chunk.length
 
-      (import_export_retry + 1).times do |i|
-        begin
-          if import_as_replace
-            $runner.driver.update(import_domain, chunk)
-          else
-            $runner.driver.insert(import_domain, chunk)
-          end
-
-          break
-        rescue SimpleDB::Error => e
-          if /\AServiceUnavailable:/ =~ e.message
-            raise e if i >= import_export_retry
-          else
-            raise e
-          end
-        rescue Timeout::Error => e
-          raise e if i >= import_export_retry
+      retry_api_call do
+        if import_as_replace
+          $runner.driver.update(import_domain, chunk)
+        else
+          $runner.driver.insert(import_domain, chunk)
         end
-
-        output_error("Retry... (wait %d seconds)" % retry_interval, true)
-        sleep retry_interval
       end
 
       output_error("#{rownum} #{rownum > 1 ? 'rows' : 'row'} was inputted...", true)
