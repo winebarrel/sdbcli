@@ -108,14 +108,15 @@ def execute(src, show_rows = false)
         out = $runner.execute(query, inline, $consistent)
       end
 
-      if out.kind_of?(Integer)
+      if out.kind_of?(SimpleDB::Runner::Rownum)
+        rownum = out.to_i
         puts case $format
              when :yaml
-               "# #{out} #{out > 1 ? 'rows' : 'row'} changed"
+               "# #{rownum} #{rownum > 1 ? 'rows' : 'row'} changed"
              when :json
-               "// #{out} #{out > 1 ? 'rows' : 'row'} changed"
+               "// #{rownum} #{rownum > 1 ? 'rows' : 'row'} changed"
              else
-               "# #{out} #{out > 1 ? 'rows' : 'row'} changed"
+               "# #{rownum} #{rownum > 1 ? 'rows' : 'row'} changed"
              end
       elsif out
         str = nil

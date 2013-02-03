@@ -16,6 +16,16 @@ module SimpleDB
     }
 
   class Runner
+    class Rownum
+      def initialize(rownum)
+        @rownum = rownum
+      end
+
+      def to_i
+        @rownum
+      end
+    end
+
     attr_reader :driver
 
     def initialize(accessKeyId, secretAccessKey, endpoint = 'sdb.amazonaws.com')
@@ -60,37 +70,37 @@ module SimpleDB
       when :INSERT
         rownum = parsed.items.length
         @driver.insert(parsed.domain, parsed.items)
-        rownum
+        Rownum.new(rownum)
       when :UPDATE
         rownum = parsed.items.length
         @driver.update(parsed.domain, parsed.items)
-        rownum
+        Rownum.new(rownum)
       when :UPDATE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.update(parsed.domain, items)
-        rownum
+        Rownum.new(rownum)
       when :MERGE
         rownum = parsed.items.length
         @driver.insert(parsed.domain, parsed.items)
-        rownum
+        Rownum.new(rownum)
       when :MERGE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.insert(parsed.domain, items)
-        rownum
+        Rownum.new(rownum)
       when :DELETE
         rownum = parsed.items.length
         @driver.delete(parsed.domain, parsed.items)
-        rownum
+        Rownum.new(rownum)
       when :DELETE_WITH_EXPR
         query = "SELECT itemName FROM #{parsed.domain} #{parsed.expr}"
         items = @driver.select(query, consistent).map {|i| [i[0], parsed.attrs] }
         rownum = items.length
         @driver.delete(parsed.domain, items)
-        rownum
+        Rownum.new(rownum)
       when :SELECT
         items = @driver.select(parsed.query, consistent)
 
