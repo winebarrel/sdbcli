@@ -132,12 +132,14 @@ module SimpleDB
         rownum = items.length
         @driver.delete(parsed.domain, items)
         Rownum.new(rownum)
-      when :SELECT, :NEXT
+      when :SELECT, :NEXT, :CURRENT
         items = case command
                 when :SELECT
                   @driver.select(parsed.query, consistent, true)
                 when :NEXT
                   @driver.next_list(consistent)
+                when :CURRENT
+                  @driver.current_list(consistent)
                 else
                   raise 'must not happen'
                 end

@@ -8,6 +8,7 @@ rule
        | delete_stmt
        | select_stmt
        | next_stmt
+       | current_stmt
        | create_stmt
        | drop_stmt
        | show_stmt
@@ -197,6 +198,12 @@ rule
                 struct(:NEXT, :ruby => ruby)
               }
 
+  next_stmt : CURRENT
+              {
+                ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
+                struct(:CURRENT, :ruby => ruby)
+              }
+
   create_stmt : CREATE DOMAIN IDENTIFIER
                 {
                   struct(:CREATE, :domain => val[2])
@@ -329,6 +336,8 @@ def scan
       yield [:SELECT, tok + @ss.scan(/.*/)]
     elsif (tok = @ss.scan /NEXT\b/i)
       yield [:NEXT, @ss.scan(/\s*\|\s*.*/)]
+    elsif (tok = @ss.scan /CUR(RENT)?\b/i)
+      yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)

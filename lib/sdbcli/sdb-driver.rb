@@ -12,6 +12,7 @@ module SimpleDB
       @client = Client.new(accessKeyId, secretAccessKey, endpoint)
       @select_expr = nil
       @next_token = nil
+      @current_token = nil
     end
 
     def endpoint
@@ -119,6 +120,7 @@ module SimpleDB
 
       if persist
         @select_expr = expr
+        @current_token = nil
         @next_token = token
       end
 
@@ -133,7 +135,27 @@ module SimpleDB
       params = {:SelectExpression => @select_expr, :ConsistentRead => consistent}
       items = []
 
-      @next_token = iterate(:select, params, @next_token) do |doc|
+      token = iterate(:select, params, @next_token) do |doc|
+        doc.css('Item').map do |i|
+          items << [i.at_css('Name').content, attrs_to_hash(i)]
+        end
+      end
+
+      @current_token = @next_token
+      @next_token = token
+
+      return items
+    end
+
+    def current_list(consistent = false)
+      unless @select_expr
+        return []
+      end
+
+      params = {:SelectExpression => @select_expr, :ConsistentRead => consistent}
+      items = []
+
+      iterate(:select, params, @current_token || :first) do |doc|
         doc.css('Item').map do |i|
           items << [i.at_css('Name').content, attrs_to_hash(i)]
         end
