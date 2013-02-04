@@ -394,6 +394,10 @@ NEXT
   displays a continuation of a result
   (NEXT statement is published after SELECT statement)
 
+CUR[RENT]
+  displays a present result
+  (CURRENT statement is published after SELECT statement)
+
 DESC domain_name
   displays information about the domain
 
