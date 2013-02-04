@@ -19,7 +19,10 @@ rule
            @stmt_with_expr
          }
 
-  get_stmt : GET get_output_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
+  value : STRING
+        | NUMBER
+
+  get_stmt : GET get_output_list FROM IDENTIFIER WHERE ITEMNAME '=' value
              {
                 struct(:GET, :domain => val[3], :item_name => val[7], :attr_names => val[1])
              }
@@ -79,7 +82,7 @@ rule
   itemname_identifier : ITEMNAME
                       | IDENTIFIER
 
-  update_stmt : UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME '=' VALUE
+  update_stmt : UPDATE IDENTIFIER SET set_clause_list WHERE ITEMNAME '=' value
                 {
                   attrs = {}
                   val[3].each {|k, v| attrs[k] = v }
@@ -104,7 +107,7 @@ rule
                   @stmt_with_expr = struct(:UPDATE_WITH_EXPR, :domain => val[1], :attrs => attrs, :expr => 'WHERE itemName')
                 }
 
-  merge_stmt : UPDATE IDENTIFIER ADD set_clause_list WHERE ITEMNAME '=' VALUE
+  merge_stmt : UPDATE IDENTIFIER ADD set_clause_list WHERE ITEMNAME '=' value
                {
                  attrs = {}
                  val[3].each {|k, v| attrs[k] = v }
@@ -138,12 +141,12 @@ rule
                       val[0] + [val[2]]
                     }
 
-  set_clause : IDENTIFIER '=' VALUE
+  set_clause : IDENTIFIER '=' value
                {
                  [val[0], val[2]]
                }
 
-  delete_stmt : DELETE delete_attr_list FROM IDENTIFIER WHERE ITEMNAME '=' VALUE
+  delete_stmt : DELETE delete_attr_list FROM IDENTIFIER WHERE ITEMNAME '=' value
                 {
                   struct(:DELETE, :domain => val[3], :items => [[val[7], val[1]]])
                 }
@@ -244,11 +247,11 @@ rule
                      val[0] + [val[2]]
                    }
 
-  value_list : VALUE
+  value_list : value
                {
                  [val[0]]
                }
-             | value_list ',' VALUE
+             | value_list ',' value
                {
                  [val[0], val[2]].flatten
                }
@@ -343,11 +346,11 @@ def scan
     elsif (tok = @ss.scan /`([^`]|``)*`/)
       yield [:IDENTIFIER, tok.slice(1...-1).gsub(/``/, '`')]
     elsif (tok = @ss.scan /'([^']|'')*'/) #'
-      yield [:VALUE, tok.slice(1...-1).gsub(/''/, "'")]
+      yield [:STRING, tok.slice(1...-1).gsub(/''/, "'")]
     elsif (tok = @ss.scan /"([^"]|"")*"/) #"
-      yield [:VALUE, tok.slice(1...-1).gsub(/""/, '"')]
+      yield [:STRING, tok.slice(1...-1).gsub(/""/, '"')]
     elsif (tok = @ss.scan /\d+(\.\d+)?/)
-      yield [:VALUE, tok]
+      yield [:NUMBER, tok]
     elsif (tok = @ss.scan /[,\(\)\*]/)
       yield [tok, tok]
     elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
