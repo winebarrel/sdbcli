@@ -9,6 +9,7 @@ rule
        | select_stmt
        | next_stmt
        | current_stmt
+       | page_stmt
        | create_stmt
        | drop_stmt
        | show_stmt
@@ -177,7 +178,7 @@ rule
                   ss = StringScanner.new(val[0])
 
                   until ss.eos?
-                    if (tok = ss.scan %r{[^-`'";\\/#|]+}) #'
+                    if (tok = ss.scan /[^`'"|]+/) #'
                       query << tok
                     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
                       query << tok
@@ -211,6 +212,13 @@ rule
                 {
                   struct(:CREATE, :domain => val[2])
                 }
+
+  page_stmt : PAGE
+              {
+                page, ruby = val[0].split(/\s*\|\s*/, 2)
+                page = page.split(/\s+/, 2).last.strip.to_i
+                struct(:PAGE, :page => page, :ruby => ruby)
+              }
 
   drop_stmt : DROP DOMAIN IDENTIFIER
               {
@@ -341,6 +349,8 @@ def scan
       yield [:NEXT, @ss.scan(/\s*\|\s*.*/)]
     elsif (tok = @ss.scan /CUR(RENT)?\b/i)
       yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
+    elsif (tok = @ss.scan /PAGE\s+\d+/i)
+      yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)
