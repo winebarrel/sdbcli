@@ -398,6 +398,10 @@ CUR[RENT]
   displays a present result
   (CURRENT statement is published after SELECT statement)
 
+PAGE number
+  displays a result of the specified page
+  (PAGE statement is published after SELECT statement)
+
 DESC domain_name
   displays information about the domain
 
