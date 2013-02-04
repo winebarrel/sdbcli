@@ -137,7 +137,7 @@ module SimpleDB
       if (error = doc.at_css('Errors Error'))
         code = error.at_css('Code').content
         message = error.at_css('Message').content
-        raise Error, "#{code}: #{message}"
+        raise SimpleDB::Error, "#{code}: #{message}"
       end
     end
 
