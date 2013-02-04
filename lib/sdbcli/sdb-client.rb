@@ -115,7 +115,7 @@ module SimpleDB
             body = Zlib::GzipReader.wrap(f).read
           end
         else
-          body = res.bod
+          body = res.body
         end
 
         Nokogiri::XML(body)
