@@ -390,15 +390,19 @@ SELECT output_list FROM domain_name [WHERE expression] [sort_instructions] [LIMI
   queries using the SELECT statement
   see http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/UsingSelect.html
 
-NEXT
+N[EXT]
   displays a continuation of a result
   (NEXT statement is published after SELECT statement)
 
-CUR[RENT]
+C[URRENT]
   displays a present result
   (CURRENT statement is published after SELECT statement)
 
-PAGE number
+P[REV]
+  displays a previous result
+  (PREV statement is published after SELECT statement)
+
+  PAGE number
   displays a result of the specified page
   (PAGE statement is published after SELECT statement)
 
