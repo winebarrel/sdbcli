@@ -15,6 +15,7 @@ module SimpleDB
       @select_expr = nil
       @next_token = nil
       @current_token = nil
+      @current_page = 1
     end
 
     def endpoint
@@ -124,6 +125,7 @@ module SimpleDB
         @select_expr = expr
         @current_token = nil
         @next_token = token
+        @current_page = 1
       end
 
       return items
@@ -145,6 +147,7 @@ module SimpleDB
 
       @current_token = @next_token
       @next_token = token
+      @current_page += 1
 
       return items
     end
@@ -202,6 +205,44 @@ module SimpleDB
 
       @current_token = token
       @next_token = new_token
+      @current_page = page
+
+      return items
+    end
+
+    def prev_list(consistent = false)
+      unless @select_expr and @current_page > 1
+        return []
+      end
+
+      ss = StringScanner.new(@select_expr.dup)
+      limit = 100
+
+      until ss.eos?
+        if ss.scan(/[^`'"L]+/i) #'
+        elsif ss.scan( /`(?:[^`]|``)*`/)
+        elsif ss.scan(/'(?:[^']|'')*'/) #'
+        elsif ss.scan(/"(?:[^"]|"")*"/) #"
+        elsif (tok = ss.scan /LIMIT\s+\d\b/i)
+          limit = tok.split(/\s+/).last.to_i
+        elsif ss.scan(/./)
+        end
+      end
+
+      params = {:SelectExpression => @select_expr, :ConsistentRead => consistent}
+      items = []
+
+      token = (@current_page > 2) ? SimpleDB::TokenGenerator.next_token(limit, @current_page - 1) : :first
+
+      new_token = iterate(:select, params, token) do |doc|
+        doc.css('Item').map do |i|
+          items << [i.at_css('Name').content, attrs_to_hash(i)]
+        end
+      end
+
+      @current_token = token
+      @next_token = new_token
+      @current_page -= 1
 
       return items
     end

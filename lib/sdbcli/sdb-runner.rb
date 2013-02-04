@@ -132,7 +132,7 @@ module SimpleDB
         rownum = items.length
         @driver.delete(parsed.domain, items)
         Rownum.new(rownum)
-      when :SELECT, :NEXT, :CURRENT, :PAGE
+      when :SELECT, :NEXT, :CURRENT, :PREV, :PAGE
         items = case command
                 when :SELECT
                   @driver.select(parsed.query, consistent, true)
@@ -140,6 +140,8 @@ module SimpleDB
                   @driver.next_list(consistent)
                 when :CURRENT
                   @driver.current_list(consistent)
+                when :PREV
+                  @driver.prev_list(consistent)
                 when :PAGE
                   @driver.page_to(parsed.page, consistent)
                 else

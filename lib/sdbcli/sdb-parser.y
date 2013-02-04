@@ -9,6 +9,7 @@ rule
        | select_stmt
        | next_stmt
        | current_stmt
+       | prev_stmt
        | page_stmt
        | create_stmt
        | drop_stmt
@@ -202,10 +203,16 @@ rule
                 struct(:NEXT, :ruby => ruby)
               }
 
-  next_stmt : CURRENT
+  current_stmt : CURRENT
+                 {
+                   ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
+                   struct(:CURRENT, :ruby => ruby)
+                 }
+
+  next_stmt : PREV
               {
                 ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                struct(:CURRENT, :ruby => ruby)
+                struct(:PREV, :ruby => ruby)
               }
 
   create_stmt : CREATE DOMAIN IDENTIFIER
@@ -345,10 +352,12 @@ def scan
       yield [tok.upcase.to_sym, tok]
     elsif (tok = @ss.scan /SELECT\b/i)
       yield [:SELECT, tok + @ss.scan(/.*/)]
-    elsif (tok = @ss.scan /NEXT\b/i)
+    elsif (tok = @ss.scan /N(EXT)?\b/i)
       yield [:NEXT, @ss.scan(/\s*\|\s*.*/)]
-    elsif (tok = @ss.scan /CUR(RENT)?\b/i)
+    elsif (tok = @ss.scan /C(URRENT)?\b/i)
       yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
+    elsif (tok = @ss.scan /P(REV)?\b/i)
+      yield [:PREV, @ss.scan(/\s*\|\s*.*/)]
     elsif (tok = @ss.scan /PAGE\s+\d+/i)
       yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
