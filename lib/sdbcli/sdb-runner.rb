@@ -132,7 +132,7 @@ module SimpleDB
         rownum = items.length
         @driver.delete(parsed.domain, items)
         Rownum.new(rownum)
-      when :SELECT, :NEXT, :CURRENT
+      when :SELECT, :NEXT, :CURRENT, :PAGE
         items = case command
                 when :SELECT
                   @driver.select(parsed.query, consistent, true)
@@ -140,6 +140,8 @@ module SimpleDB
                   @driver.next_list(consistent)
                 when :CURRENT
                   @driver.current_list(consistent)
+                when :PAGE
+                  @driver.page_to(parsed.page, consistent)
                 else
                   raise 'must not happen'
                 end
@@ -168,7 +170,7 @@ module SimpleDB
           begin
             items = items.instance_eval(parsed.ruby.strip)
           rescue SyntaxError => e
-            raise e.message
+            raise SimpleDB::Error, e.message
           end
         end
 
