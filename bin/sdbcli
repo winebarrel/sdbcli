@@ -141,7 +141,11 @@ def execute(src, show_rows = false)
             end
             str << "]"
           else
-            str = JSON.pretty_generate(out)
+            if out.kind_of?(Array) or out.kind_of?(Hash)
+              str = JSON.pretty_generate(out)
+            else
+              str = out.to_json
+            end
           end
         else
           output_error('Unknown format')
