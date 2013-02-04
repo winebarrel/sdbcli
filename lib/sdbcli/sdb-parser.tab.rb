@@ -98,8 +98,8 @@ def scan
       yield [:VALUE, tok.slice(1...-1).gsub(/''/, "'")]
     elsif (tok = @ss.scan /"([^"]|"")*"/) #"
       yield [:VALUE, tok.slice(1...-1).gsub(/""/, '"')]
-    elsif (tok = @ss.scan /(0|[1-9]\d*)/)
-      yield [:NATURAL_NUMBER, tok.to_i]
+    elsif (tok = @ss.scan /\d+(\.\d+)?/)
+      yield [:VALUE, tok]
     elsif (tok = @ss.scan /[,\(\)\*]/)
       yield [tok, tok]
     elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
