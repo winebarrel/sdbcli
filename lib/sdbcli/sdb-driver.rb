@@ -1,4 +1,6 @@
 require 'sdbcli/sdb-client'
+require 'sdbcli/sdb-token-generator'
+require 'strscan'
 
 module SimpleDB
   class Error < StandardError; end
@@ -164,6 +166,46 @@ module SimpleDB
       return items
     end
 
+    def page_to(page, consistent = false)
+      if page < 1
+        raise SimpleDB::Error, "Invalid page number: #{page}"
+      end
+
+      unless @select_expr
+        return []
+      end
+
+      ss = StringScanner.new(@select_expr.dup)
+      limit = 100
+
+      until ss.eos?
+        if ss.scan(/[^`'"L]+/i) #'
+        elsif ss.scan( /`(?:[^`]|``)*`/)
+        elsif ss.scan(/'(?:[^']|'')*'/) #'
+        elsif ss.scan(/"(?:[^"]|"")*"/) #"
+        elsif (tok = ss.scan /LIMIT\s+\d\b/i)
+          limit = tok.split(/\s+/).last.to_i
+        elsif ss.scan(/./)
+        end
+      end
+
+      params = {:SelectExpression => @select_expr, :ConsistentRead => consistent}
+      items = []
+
+      token = (page > 1) ? SimpleDB::TokenGenerator.next_token(limit, page) : :first
+
+      new_token = iterate(:select, params, token) do |doc|
+        doc.css('Item').map do |i|
+          items << [i.at_css('Name').content, attrs_to_hash(i)]
+        end
+      end
+
+      @current_token = token
+      @next_token = new_token
+
+      return items
+    end
+
     def delete(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
         params = {}
@@ -237,7 +279,11 @@ module SimpleDB
         token = nil
 
         while @token
-          @params.update(:NextToken => @token.content) if @token != :first
+          if @token != :first
+            tok = @token.kind_of?(String) ? @token : @token.content
+            @params.update(:NextToken => tok)
+          end
+
           doc = @client.send(@method, @params)
           yield(doc)
           token = doc.at_css('NextToken')
