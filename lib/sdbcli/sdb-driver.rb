@@ -247,6 +247,10 @@ module SimpleDB
       return items
     end
 
+    def current_page
+      @current_page
+    end
+
     def delete(domain_name, items = {})
       until (chunk = items.slice!(0, MAX_NUMBER_SUBMITTED_ITEMS)).empty?
         params = {}

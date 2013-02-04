@@ -143,27 +143,29 @@ module SimpleDB
                 when :PREV
                   @driver.prev_list(consistent)
                 when :PAGE
-                  @driver.page_to(parsed.page, consistent)
+                  parsed.page ? @driver.page_to(parsed.page, consistent) : @driver.current_page
                 else
                   raise 'must not happen'
                 end
 
-        def items.method_missing(method_name)
-          case method_name.to_s
-          when /itemName/i
-            self.map {|i| i[0] }
-          else
-            self.map {|i| i[1][method_name.to_s] }
-          end
-        end
-
-        items.each do |item|
-          def item.method_missing(method_name)
+        unless items.kind_of?(Integer)
+          def items.method_missing(method_name)
             case method_name.to_s
             when /itemName/i
-              self[0]
+              self.map {|i| i[0] }
             else
-              self[1][method_name.to_s]
+              self.map {|i| i[1][method_name.to_s] }
+            end
+          end
+
+          items.each do |item|
+            def item.method_missing(method_name)
+              case method_name.to_s
+              when /itemName/i
+                self[0]
+              else
+                self[1][method_name.to_s]
+              end
             end
           end
         end

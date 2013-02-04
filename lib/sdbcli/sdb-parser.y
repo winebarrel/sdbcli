@@ -223,7 +223,8 @@ rule
   page_stmt : PAGE
               {
                 page, ruby = val[0].split(/\s*\|\s*/, 2)
-                page = page.split(/\s+/, 2).last.strip.to_i
+                page = page.split(/\s+/, 2)[1]
+                page = page.strip.to_i if page
                 struct(:PAGE, :page => page, :ruby => ruby)
               }
 
@@ -358,7 +359,7 @@ def scan
       yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
     elsif (tok = @ss.scan /P(REV)?\b/i)
       yield [:PREV, @ss.scan(/\s*\|\s*.*/)]
-    elsif (tok = @ss.scan /PAGE\s+\d+/i)
+    elsif (tok = @ss.scan /PAGE(\s+\d+)?/i)
       yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]

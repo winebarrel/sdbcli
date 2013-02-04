@@ -13,7 +13,7 @@ module SimpleDB
 
 class Parser < Racc::Parser
 
-module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 281)
+module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 282)
 
 KEYWORDS = %w(
   ADD
@@ -94,7 +94,7 @@ def scan
       yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
     elsif (tok = @ss.scan /P(REV)?\b/i)
       yield [:PREV, @ss.scan(/\s*\|\s*.*/)]
-    elsif (tok = @ss.scan /PAGE\s+\d+/i)
+    elsif (tok = @ss.scan /PAGE(\s+\d+)?/i)
       yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
@@ -721,76 +721,77 @@ module_eval(<<'.,.,', 'sdb-parser.y', 219)
 module_eval(<<'.,.,', 'sdb-parser.y', 224)
   def _reduce_52(val, _values)
                     page, ruby = val[0].split(/\s*\|\s*/, 2)
-                page = page.split(/\s+/, 2).last.strip.to_i
+                page = page.split(/\s+/, 2)[1]
+                page = page.strip.to_i if page
                 struct(:PAGE, :page => page, :ruby => ruby)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 231)
+module_eval(<<'.,.,', 'sdb-parser.y', 232)
   def _reduce_53(val, _values)
                     struct(:DROP, :domain => val[2])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 236)
+module_eval(<<'.,.,', 'sdb-parser.y', 237)
   def _reduce_54(val, _values)
                     struct(:SHOW, :operand => :domains)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 240)
+module_eval(<<'.,.,', 'sdb-parser.y', 241)
   def _reduce_55(val, _values)
                     struct(:SHOW, :operand => :regions)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 244)
+module_eval(<<'.,.,', 'sdb-parser.y', 245)
   def _reduce_56(val, _values)
                    struct(:USE, :endpoint => val[1])
              
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 248)
+module_eval(<<'.,.,', 'sdb-parser.y', 249)
   def _reduce_57(val, _values)
                     struct(:DESCRIBE, :domain => val[1])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 252)
+module_eval(<<'.,.,', 'sdb-parser.y', 253)
   def _reduce_58(val, _values)
                     struct(:DESCRIBE, :domain => val[1])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 257)
+module_eval(<<'.,.,', 'sdb-parser.y', 258)
   def _reduce_59(val, _values)
                          [val[0]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 261)
+module_eval(<<'.,.,', 'sdb-parser.y', 262)
   def _reduce_60(val, _values)
                          val[0] + [val[2]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 266)
+module_eval(<<'.,.,', 'sdb-parser.y', 267)
   def _reduce_61(val, _values)
                      [val[0]]
                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 270)
+module_eval(<<'.,.,', 'sdb-parser.y', 271)
   def _reduce_62(val, _values)
                      [val[0], val[2]].flatten
                
