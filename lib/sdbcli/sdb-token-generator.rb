@@ -1,5 +1,6 @@
-# original code:
-# http://d.hatena.ne.jp/tottokug/20120810/1344611039
+# original code: http://d.hatena.ne.jp/tottokug/20120810/1344611039
+# original author: tottokug (http://www.hatena.ne.jp/tottokug/)
+
 module SimpleDB
   class TokenGenerator
 
