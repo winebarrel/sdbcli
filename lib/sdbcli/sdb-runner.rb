@@ -26,10 +26,12 @@ class Array
   def as_row
     row = self.dup
 
-    def row.method_missing(method_name)
+    def row.method_missing(method_name, *args, &block)
       case method_name.to_s
       when /itemName/i
         self[0]
+      when /=\Z/
+        self[1][method_name.to_s.sub(/=\Z/, '')] = (args.length > 2) ? args : args[0]
       else
         self[1][method_name.to_s]
       end
@@ -41,10 +43,12 @@ class Array
   def as_row!
     row = self
 
-    def row.method_missing(method_name)
+    def row.method_missing(method_name, *args, &block)
       case method_name.to_s
       when /itemName/i
         self[0]
+      when /=\Z/
+        self[1][method_name.to_s.sub(/=\Z/, '')] = (args.length > 2) ? args : args[0]
       else
         self[1][method_name.to_s]
       end
@@ -56,10 +60,15 @@ class Array
   def as_rows
     rows = self.dup
 
-    def rows.method_missing(method_name)
+    def rows.method_missing(method_name, *args, &block)
       case method_name.to_s
       when /itemName/i
         self.map {|i| i[0] }
+      when /=\Z/
+        self.each do |i|
+          i[1][method_name.to_s.sub(/=\Z/, '')] = (args.length > 2) ? args : args[0]
+        end
+        self
       else
         self.map {|i| i[1][method_name.to_s] }
       end
@@ -71,10 +80,15 @@ class Array
   def as_rows!
     rows = self
 
-    def rows.method_missing(method_name)
+    def rows.method_missing(method_name, *args, &block)
       case method_name.to_s
       when /itemName/i
         self.map {|i| i[0] }
+      when /=\Z/
+        self.each do |i|
+          i[1][method_name.to_s.sub(/=\Z/, '')] = (args.length > 2) ? args : args[0]
+        end
+        self
       else
         self.map {|i| i[1][method_name.to_s] }
       end
