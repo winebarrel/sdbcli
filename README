@@ -189,6 +189,14 @@ If '-' is specified as a file name, the input/output of data will become a stand
 
 'sum' method and 'avg' method are added to Array class.
 
+== Pipe to shell
+
+  ap-northeast-1> select * from employees limit 3 ! awk '{print $1}' ;
+  --- |
+  ["100000",
+  ["100001",
+  ["100002",
+
 == Group By (Aggregate)
 
   ap-northeast-1> select * from access_logs limit 30;
