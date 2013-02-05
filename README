@@ -189,6 +189,26 @@ If '-' is specified as a file name, the input/output of data will become a stand
 
 'sum' method and 'avg' method are added to Array class.
 
+== Group By (Aggregate)
+
+  ap-northeast-1> select * from access_logs limit 30;
+  --- 
+  - [20130205/host1, {host: host1, response_time: "298.37"}]
+  - [20130205/host2, {host: host2, response_time: "294.65"}]
+  - [20130205/host3, {host: host3, response_time: "293.42"}]
+  - [20130205/host4, {host: host4, response_time: "294.08"}]
+  - [20130205/host5, {host: host5, response_time: "294.3"}]
+  ...
+  # 30 rows in set
+  
+  ap-northeast-1> select * from access_logs limit 30 | group_by(:host) {|i| i.response_time.to_f.avg };
+  --- 
+  host1: 303.6425
+  host2: 301.8875
+  host3: 300.9525
+  host4: 302.1675
+  host5: 301.62
+
 == Exec ruby or shell command
 
   ap-northeast-1> | (1 + 1).to_f;
