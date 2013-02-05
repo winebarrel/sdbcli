@@ -1,6 +1,28 @@
 require 'sdbcli/sdb-driver'
 require 'sdbcli/sdb-parser.tab'
 
+class Object
+  def _(out)
+    open(out, 'wb') do |f|
+      if block_given?
+        f.puts(yield(self))
+      else
+        f.puts(self.to_s)
+      end
+    end
+  end
+
+  def __(out)
+    open(out, 'ab') do |f|
+      if block_given?
+        f.puts(yield(self))
+      else
+        f.puts(self.to_s)
+      end
+    end
+  end
+end
+
 # XXX:
 class Array
   def to_i
