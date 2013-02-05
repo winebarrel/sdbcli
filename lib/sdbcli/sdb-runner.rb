@@ -22,6 +22,92 @@ class Array
   def avg
     self.sum / self.length
   end
+
+  def as_row
+    row = self.dup
+
+    def row.method_missing(method_name)
+      case method_name.to_s
+      when /itemName/i
+        self[0]
+      else
+        self[1][method_name.to_s]
+      end
+    end
+
+    return row
+  end
+
+  def as_row!
+    row = self
+
+    def row.method_missing(method_name)
+      case method_name.to_s
+      when /itemName/i
+        self[0]
+      else
+        self[1][method_name.to_s]
+      end
+    end
+
+    return row
+  end
+
+  def as_rows
+    rows = self.dup
+
+    def rows.method_missing(method_name)
+      case method_name.to_s
+      when /itemName/i
+        self.map {|i| i[0] }
+      else
+        self.map {|i| i[1][method_name.to_s] }
+      end
+    end
+
+    return rows
+  end
+
+  def as_rows!
+    rows = self
+
+    def rows.method_missing(method_name)
+      case method_name.to_s
+      when /itemName/i
+        self.map {|i| i[0] }
+      else
+        self.map {|i| i[1][method_name.to_s] }
+      end
+    end
+
+    return rows
+  end
+
+  def inline
+    obj = self.dup
+    def obj.to_yaml_style; :inline; end
+    return obj
+  end
+
+  def inline!
+    obj = self
+    def obj.to_yaml_style; :inline; end
+    return obj
+  end
+end
+
+class Hash
+  def inline
+    obj = self.dup
+    def obj.to_yaml_style; :inline; end
+    return obj
+  end
+
+  def inline!
+    obj = self
+    def obj.to_yaml_style; :inline; end
+    return obj
+  end
 end
 
 module SimpleDB
@@ -92,11 +178,7 @@ module SimpleDB
       case command
       when :GET
         item = @driver.get(parsed.domain, parsed.item_name, parsed.attr_names, consistent)
-
-        if inline
-          def item.to_yaml_style; :inline; end
-        end
-
+        item.inline! if inline
         item
       when :INSERT
         rownum = parsed.items.length
@@ -149,24 +231,10 @@ module SimpleDB
                 end
 
         unless items.kind_of?(Integer)
-          def items.method_missing(method_name)
-            case method_name.to_s
-            when /itemName/i
-              self.map {|i| i[0] }
-            else
-              self.map {|i| i[1][method_name.to_s] }
-            end
-          end
+          items.as_rows!
 
           items.each do |item|
-            def item.method_missing(method_name)
-              case method_name.to_s
-              when /itemName/i
-                self[0]
-              else
-                self[1][method_name.to_s]
-              end
-            end
+            item.as_row!
           end
 
           def items.group_by(name, &block)
@@ -176,17 +244,7 @@ module SimpleDB
               key = item[1][name.to_s]
 
               unless item_h[key]
-                item_list = []
-
-                def item_list.method_missing(method_name)
-                  case method_name.to_s
-                  when /itemName/i
-                    self.map {|i| i[0] }
-                  else
-                    self.map {|i| i[1][method_name.to_s] }
-                  end
-                end
-
+                item_list = [].as_rows
                 item_h[key] = item_list
               end
 
@@ -222,9 +280,7 @@ module SimpleDB
 
         if inline and items.kind_of?(Array)
           items.each do |item|
-            if item.kind_of?(Array)
-              def item.to_yaml_style; :inline; end
-            end
+            item.inline! if item.kind_of?(Array)
           end
         end
 
