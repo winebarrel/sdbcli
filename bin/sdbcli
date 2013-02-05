@@ -406,7 +406,7 @@ PAGE [number]
   displays a present page number or displays a result of the specified page
   (PAGE statement is published after SELECT statement)
 
-DESC domain_name
+DESC[RIBE] domain_name
   displays information about the domain
 
 USE region_or_endpoint
