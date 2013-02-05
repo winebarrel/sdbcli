@@ -3,10 +3,6 @@ require 'sdbcli/sdb-parser.tab'
 
 # XXX:
 class Array
-  def to_s
-    self.map {|i| i.to_s }
-  end
-
   def to_i
     self.map {|i| i.to_i }
   end
@@ -284,10 +280,21 @@ module SimpleDB
           end
         end
 
-        if parsed.ruby
+        if parsed.script
           begin
-            items = items.instance_eval(parsed.ruby.strip)
-          rescue SyntaxError => e
+            case parsed.script_type
+            when :ruby
+              items = items.instance_eval(parsed.script.strip)
+            when :shell
+              items = IO.popen(parsed.script.strip, "r+") do |f|
+                f.puts(items.kind_of?(Array) ? items.map {|i| i.to_s }.join("\n") : items.to_s)
+                f.close_write
+                f.read
+              end
+            else
+              raise 'must not happen'
+            end
+          rescue Exception => e
             raise SimpleDB::Error, e.message
           end
         end

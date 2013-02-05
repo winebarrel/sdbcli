@@ -176,12 +176,13 @@ rule
   select_stmt : SELECT
                 {
                   query = ''
-                  ruby = nil
+                  script = nil
+                  script_type = nil
 
                   ss = StringScanner.new(val[0])
 
                   until ss.eos?
-                    if (tok = ss.scan /[^`'"|]+/) #'
+                    if (tok = ss.scan /[^`'"|!]+/) #'
                       query << tok
                     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
                       query << tok
@@ -190,31 +191,68 @@ rule
                     elsif (tok = ss.scan /"(?:[^"]|"")*"/) #"
                       query << tok
                     elsif (tok = ss.scan /\|/)
-                      ruby = ss.scan_until(/\Z/)
+                      script = ss.scan_until(/\Z/)
+                      script_type = :ruby
+                    elsif (tok = ss.scan /!/)
+                      script = ss.scan_until(/\Z/)
+                      script_type = :shell
                     elsif (tok = ss.scan /./)
                       query << tok
                     end
                   end
 
-                  struct(:SELECT, :query => query, :ruby => ruby)
+                  struct(:SELECT, :query => query, :script => script, :script_type => script_type)
                 }
 
   next_stmt : NEXT
               {
-                ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                struct(:NEXT, :ruby => ruby)
+                script = nil
+                script_type = nil
+
+                case val[0]
+                when /\A\s*\|\s*/
+                  script = val[0].sub(/\A\s*\|\s*/, '')
+                  script_type = :ruby
+                when /\A\s*!\s*/
+                  script = val[0].sub(/\A\s*!\s*/, '')
+                  script_type = :shell
+                end
+
+                struct(:NEXT, :script => script, :script_type => script_type)
               }
 
   current_stmt : CURRENT
                  {
-                   ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                   struct(:CURRENT, :ruby => ruby)
+                   script = nil
+                   script_type = nil
+
+                   case val[0]
+                   when /\A\s*\|\s*/
+                     script = val[0].sub(/\A\s*\|\s*/, '')
+                     script_type = :ruby
+                   when /\A\s*!\s*/
+                     script = val[0].sub(/\A\s*!\s*/, '')
+                     script_type = :shell
+                   end
+
+                   struct(:CURRENT, :script => script, :script_type => script_type)
                  }
 
   next_stmt : PREV
               {
-                ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                struct(:PREV, :ruby => ruby)
+                script = nil
+                script_type = nil
+
+                case val[0]
+                when /\A\s*\|\s*/
+                  script = val[0].sub(/\A\s*\|\s*/, '')
+                  script_type = :ruby
+                when /\A\s*!\s*/
+                  script = val[0].sub(/\A\s*!\s*/, '')
+                  script_type = :shell
+                end
+
+                struct(:PREV, :script => script, :script_type => script_type)
               }
 
   create_stmt : CREATE DOMAIN IDENTIFIER
@@ -224,10 +262,24 @@ rule
 
   page_stmt : PAGE
               {
-                page, ruby = val[0].split(/\s*\|\s*/, 2)
+                page = nil
+                script = nil
+                script_type = nil
+
+                case val[0]
+                when /\s*\|\s*/
+                  page, script = val[0].split(/\s*\|\s*/, 2)
+                  script_type = :ruby
+                when /\s*!\s*/
+                  page, script = val[0].split(/\s*!\s*/, 2)
+                  script_type = :shell
+                else
+                  page = val[0]
+                end
+
                 page = page.split(/\s+/, 2)[1]
                 page = page.strip.to_i if page
-                struct(:PAGE, :page => page, :ruby => ruby)
+                struct(:PAGE, :page => page, :script => script, :script_type => script_type)
               }
 
   drop_stmt : DROP DOMAIN IDENTIFIER
@@ -366,13 +418,13 @@ def scan
     elsif (tok = @ss.scan /SELECT\b/i)
       yield [:SELECT, tok + @ss.scan(/.*/)]
     elsif (tok = @ss.scan /N(EXT)?\b/i)
-      yield [:NEXT, @ss.scan(/\s*\|\s*.*/)]
+      yield [:NEXT, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /C(URRENT)?\b/i)
-      yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
+      yield [:CURRENT, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /P(REV)?\b/i)
-      yield [:PREV, @ss.scan(/\s*\|\s*.*/)]
+      yield [:PREV, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /PAGE(\s+\d+)?/i)
-      yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
+      yield [:PAGE, tok + @ss.scan(/(\s*[|!]\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)

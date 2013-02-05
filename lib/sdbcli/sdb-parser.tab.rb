@@ -13,7 +13,7 @@ module SimpleDB
 
 class Parser < Racc::Parser
 
-module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 294)
+module_eval(<<'...end sdb-parser.y/module_eval...', 'sdb-parser.y', 346)
 
 KEYWORDS = %w(
   ADD
@@ -89,13 +89,13 @@ def scan
     elsif (tok = @ss.scan /SELECT\b/i)
       yield [:SELECT, tok + @ss.scan(/.*/)]
     elsif (tok = @ss.scan /N(EXT)?\b/i)
-      yield [:NEXT, @ss.scan(/\s*\|\s*.*/)]
+      yield [:NEXT, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /C(URRENT)?\b/i)
-      yield [:CURRENT, @ss.scan(/\s*\|\s*.*/)]
+      yield [:CURRENT, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /P(REV)?\b/i)
-      yield [:PREV, @ss.scan(/\s*\|\s*.*/)]
+      yield [:PREV, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /PAGE(\s+\d+)?/i)
-      yield [:PAGE, tok + @ss.scan(/(\s*\|\s*.*)?/)]
+      yield [:PAGE, tok + @ss.scan(/(\s*[|!]\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)
@@ -143,78 +143,78 @@ end
 ##### State transition tables begin ###
 
 racc_action_table = [
-     7,    11,    78,    79,    20,    72,    45,    74,    77,    77,
-    42,    72,    61,    74,    18,    86,    87,    26,    86,    87,
-    34,     2,     6,    10,    14,    17,    62,    22,    25,    29,
-    86,    87,     1,     5,     9,    13,    16,    86,    87,    49,
-    50,    86,    87,    86,    87,    82,    83,   107,   108,    86,
-    87,    69,    70,    86,    87,    59,    60,   112,   108,    63,
-    64,    65,    65,    56,    58,    75,    57,    56,    55,    80,
-    81,    54,    84,    53,    65,    89,    90,    91,    92,    45,
-    94,    95,    96,    97,    98,    48,    47,    46,    41,    40,
-   106,    39,   109,    38,    37,    76 ]
+    19,    10,    79,    76,    20,    75,    41,    74,    77,    77,
+    39,    75,    37,    74,    21,    87,    88,    22,    87,    88,
+    23,    24,    25,    26,    27,    28,    62,    29,    30,    31,
+    48,    49,    32,    33,    34,    35,    36,    87,    88,    87,
+    88,   107,   108,    87,    88,   112,   108,    87,    88,    83,
+    84,    57,    58,    87,    88,    87,    88,    69,    70,    63,
+    64,    67,    67,    60,    71,    55,    59,    78,    61,    80,
+    81,    82,    56,    85,    67,    55,    90,    91,    92,    93,
+    54,    95,    96,    97,    53,    99,    52,    51,    50,    47,
+   106,    46,   109,    41,    43,    42 ]
 
 racc_action_check = [
-     0,     0,    66,    68,     0,    83,    20,    83,    66,    68,
-    20,    62,    52,    62,     0,    94,    94,     0,    96,    96,
+     0,     0,    68,    65,     0,    64,    20,    64,    68,    65,
+    20,    84,     1,    84,     0,    95,    95,     0,    99,    99,
      0,     0,     0,     0,     0,     0,    54,     0,     0,     0,
-    95,    95,     0,     0,     0,     0,     0,    97,    97,    29,
-    29,    98,    98,    76,    76,    71,    71,   105,   105,   108,
-   108,    61,    61,   109,   109,    48,    48,   111,   111,    55,
-    56,    59,    60,    51,    47,    63,    46,    44,    43,    69,
-    70,    41,    75,    40,    77,    78,    79,    80,    82,    34,
-    84,    89,    90,    91,    92,    26,    25,    24,    18,    17,
-    99,     9,   106,     5,     1,    65 ]
+    31,    31,     0,     0,     0,     0,     0,    97,    97,    96,
+    96,   104,   104,    92,    92,   111,   111,    78,    78,    72,
+    72,    43,    43,   108,   108,   109,   109,    59,    59,    55,
+    56,    57,    58,    46,    62,    45,    44,    67,    47,    69,
+    70,    71,    42,    76,    77,    40,    79,    80,    82,    83,
+    38,    85,    90,    91,    37,    93,    34,    33,    32,    30,
+   100,    28,   106,    23,    22,    21 ]
 
 racc_action_pointer = [
-    -1,    87,   nil,   nil,   nil,    86,   nil,   nil,   nil,    84,
-   nil,   nil,   nil,   nil,   nil,   nil,   nil,    62,    72,   nil,
-    -1,   nil,   nil,   nil,    87,    59,    78,   nil,   nil,     8,
-   nil,   nil,   nil,   nil,    72,   nil,   nil,   nil,   nil,   nil,
-    66,    64,   nil,    62,    53,   nil,    66,    57,    36,   nil,
-   nil,    49,     6,   nil,    14,    52,    53,   nil,   nil,    54,
-    55,    44,     4,    57,   nil,    85,    -6,   nil,    -5,    61,
-    61,    32,   nil,   nil,   nil,    63,    40,    67,    66,    67,
-    68,   nil,    61,    -2,    70,   nil,   nil,   nil,   nil,    71,
-    72,    73,    72,   nil,    12,    27,    15,    34,    38,    76,
-   nil,   nil,   nil,   nil,   nil,    34,    80,   nil,    46,    50,
-   nil,    44,   nil ]
+    -1,    12,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+    -1,    79,    87,    86,   nil,   nil,   nil,   nil,    64,   nil,
+    62,    -1,    81,    80,    79,   nil,   nil,    84,    74,   nil,
+    61,   nil,    65,    32,    60,    51,    56,    61,   nil,   nil,
+   nil,   nil,   nil,   nil,    19,    52,    48,    54,    55,    50,
+   nil,   nil,    56,   nil,    -2,    -5,   nil,    57,    -6,    61,
+    61,    62,    36,   nil,   nil,   nil,    64,    67,    44,    67,
+    68,   nil,    68,    62,     4,    71,   nil,   nil,   nil,   nil,
+    72,    73,    40,    73,   nil,    12,    36,    34,   nil,    15,
+    76,   nil,   nil,   nil,    28,   nil,    80,   nil,    50,    52,
+   nil,    32,   nil ]
 
 racc_action_default = [
-   -67,   -67,   -49,   -17,    -5,   -67,   -50,   -18,    -6,   -67,
-   -51,    -9,    -7,   -61,   -52,    -8,   -62,   -67,   -67,   -10,
-   -22,   -11,   -54,   -12,   -67,   -67,   -67,   -13,    -1,   -67,
-   -14,    -2,   -15,    -3,   -47,   -16,    -4,   -58,   -59,   -60,
-   -67,   -67,   -23,   -67,   -24,   -63,   -67,   -67,   -67,   -56,
-   -57,   -48,   -67,   -53,   -67,   -67,   -67,   113,   -55,   -67,
-   -67,   -67,   -67,   -67,   -64,   -67,   -33,   -40,   -37,   -44,
-   -45,   -67,   -31,   -28,   -30,   -67,   -67,   -67,   -34,   -38,
-   -67,   -46,   -67,   -67,   -67,   -42,   -19,   -20,   -41,   -35,
-   -39,   -67,   -67,   -29,   -67,   -67,   -67,   -67,   -67,   -27,
-   -21,   -32,   -36,   -43,   -65,   -67,   -67,   -25,   -67,   -67,
+   -67,   -67,    -1,    -2,    -3,    -4,    -5,    -6,    -7,    -8,
+    -9,   -10,   -11,   -12,   -13,   -14,   -15,   -16,   -17,   -18,
+   -22,   -67,   -67,   -47,   -49,   -50,   -51,   -52,   -67,   -54,
+   -67,   -67,   -67,   -67,   -67,   -61,   -62,   -67,   -67,   -23,
+   -24,   -63,   -67,   -67,   -67,   -48,   -67,   -67,   -56,   -57,
+   -58,   -59,   -60,   113,   -67,   -67,   -67,   -67,   -67,   -67,
+   -53,   -55,   -67,   -64,   -67,   -33,   -40,   -67,   -37,   -44,
+   -45,   -67,   -67,   -28,   -30,   -31,   -34,   -67,   -67,   -38,
+   -67,   -46,   -67,   -67,   -67,   -35,   -41,   -19,   -20,   -42,
+   -39,   -67,   -67,   -67,   -29,   -67,   -67,   -67,   -21,   -67,
+   -27,   -32,   -36,   -43,   -67,   -65,   -67,   -25,   -67,   -67,
    -66,   -67,   -26 ]
 
 racc_goto_table = [
-    85,    73,    44,   105,    66,    68,    30,     8,    12,    15,
-    19,    21,    23,    27,   111,     4,    51,    32,   100,   101,
-   102,   103,    93,    35,     3,    24,    43,    36,    99,    33,
-    71,    31,   110,    28,    88,    52 ]
+    89,    73,   104,    40,    65,    68,    45,    15,     7,     8,
+     9,    11,   111,    12,    98,    13,    14,   101,   102,   103,
+     6,    94,    16,    17,    18,     1,    38,     5,   100,     4,
+   110,    72,     3,     2,    86,    44 ]
 
 racc_goto_check = [
-    18,    24,    20,    22,    25,    25,    14,     7,     8,     9,
-    10,    11,    12,    13,    22,     6,    20,    15,    18,    18,
-    18,    18,    24,    16,    17,     1,    19,     5,    21,     4,
-    23,     3,    18,     2,    26,    27 ]
+    18,    24,    22,    20,    25,    25,    20,    14,     7,     8,
+     9,    10,    22,    11,    18,    12,    13,    18,    18,    18,
+     6,    24,    15,    16,    17,     1,    19,     5,    21,     4,
+    18,    23,     3,     2,    26,    27 ]
 
 racc_goto_pointer = [
-   nil,    25,    33,    31,    29,    27,    15,     7,     8,     9,
-    10,    11,    12,    13,     6,    17,    23,    24,   -76,     6,
-   -18,   -64,   -95,   -32,   -61,   -55,   -43,     1 ]
+   nil,    25,    33,    32,    29,    27,    20,     8,     9,    10,
+    11,    13,    15,    16,     7,    22,    23,    24,   -78,     6,
+   -17,   -65,   -97,   -33,   -63,   -53,   -43,    12 ]
 
 racc_goto_default = [
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   104,   nil,
-   nil,   nil,   nil,   nil,   nil,   nil,    67,   nil ]
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   105,   nil,
+   nil,   nil,   nil,   nil,   nil,   nil,    66,   nil ]
 
 racc_reduce_table = [
   0, 0, :racc_error,
@@ -682,12 +682,13 @@ module_eval(<<'.,.,', 'sdb-parser.y', 171)
 module_eval(<<'.,.,', 'sdb-parser.y', 177)
   def _reduce_49(val, _values)
                       query = ''
-                  ruby = nil
+                  script = nil
+		  script_type = nil
 
                   ss = StringScanner.new(val[0])
 
                   until ss.eos?
-                    if (tok = ss.scan /[^`'"|]+/) #'
+                    if (tok = ss.scan /[^`'"|!]+/) #'
                       query << tok
                     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
                       query << tok
@@ -696,101 +697,152 @@ module_eval(<<'.,.,', 'sdb-parser.y', 177)
                     elsif (tok = ss.scan /"(?:[^"]|"")*"/) #"
                       query << tok
                     elsif (tok = ss.scan /\|/)
-                      ruby = ss.scan_until(/\Z/)
+                      script = ss.scan_until(/\Z/)
+                      script_type = :ruby
+                    elsif (tok = ss.scan /!/)
+                      script = ss.scan_until(/\Z/)
+                      script_type = :shell
                     elsif (tok = ss.scan /./)
                       query << tok
                     end
                   end
 
-                  struct(:SELECT, :query => query, :ruby => ruby)
+                  struct(:SELECT, :query => query, :script => script, :script_type => script_type)
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 203)
+module_eval(<<'.,.,', 'sdb-parser.y', 208)
   def _reduce_50(val, _values)
-                    ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                struct(:NEXT, :ruby => ruby)
+                    script = nil
+                script_type = nil
+
+                case val[0]
+                when /\A\s*\|\s*/
+                  script = val[0].sub(/\A\s*\|\s*/, '')
+                  script_type = :ruby
+                when /\A\s*!\s*/
+                  script = val[0].sub(/\A\s*!\s*/, '')
+                  script_type = :shell
+                end
+
+                struct(:NEXT, :script => script, :script_type => script_type)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 209)
+module_eval(<<'.,.,', 'sdb-parser.y', 225)
   def _reduce_51(val, _values)
-                       ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                   struct(:CURRENT, :ruby => ruby)
+                       script = nil
+                   script_type = nil
+
+                   case val[0]
+                   when /\A\s*\|\s*/
+                     script = val[0].sub(/\A\s*\|\s*/, '')
+                     script_type = :ruby
+                   when /\A\s*!\s*/
+                     script = val[0].sub(/\A\s*!\s*/, '')
+                     script_type = :shell
+                   end
+
+                   struct(:CURRENT, :script => script, :script_type => script_type)
                  
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 215)
+module_eval(<<'.,.,', 'sdb-parser.y', 242)
   def _reduce_52(val, _values)
-                    ruby = val[0].sub(/\A\s*\|\s*/, '') if val[0]
-                struct(:PREV, :ruby => ruby)
+                    script = nil
+                script_type = nil
+
+                case val[0]
+                when /\A\s*\|\s*/
+                  script = val[0].sub(/\A\s*\|\s*/, '')
+                  script_type = :ruby
+                when /\A\s*!\s*/
+                  script = val[0].sub(/\A\s*!\s*/, '')
+                  script_type = :shell
+                end
+
+                struct(:PREV, :script => script, :script_type => script_type)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 221)
+module_eval(<<'.,.,', 'sdb-parser.y', 259)
   def _reduce_53(val, _values)
                       struct(:CREATE, :domain => val[2])
                 
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 226)
+module_eval(<<'.,.,', 'sdb-parser.y', 264)
   def _reduce_54(val, _values)
-                    page, ruby = val[0].split(/\s*\|\s*/, 2)
+                    page = nil
+                script = nil
+                script_type = nil
+
+                case val[0]
+                when /\s*\|\s*/
+                  page, script = val[0].split(/\s*\|\s*/, 2)
+                  script_type = :ruby
+                when /\s*!\s*/
+                  page, script = val[0].split(/\s*!\s*/, 2)
+                  script_type = :shell
+                else
+                  page = val[0]
+                end
+
                 page = page.split(/\s+/, 2)[1]
                 page = page.strip.to_i if page
-                struct(:PAGE, :page => page, :ruby => ruby)
+                struct(:PAGE, :page => page, :script => script, :script_type => script_type)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 234)
+module_eval(<<'.,.,', 'sdb-parser.y', 286)
   def _reduce_55(val, _values)
                     struct(:DROP, :domain => val[2])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 239)
+module_eval(<<'.,.,', 'sdb-parser.y', 291)
   def _reduce_56(val, _values)
                     struct(:SHOW, :operand => :domains)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 243)
+module_eval(<<'.,.,', 'sdb-parser.y', 295)
   def _reduce_57(val, _values)
                     struct(:SHOW, :operand => :regions)
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 247)
+module_eval(<<'.,.,', 'sdb-parser.y', 299)
   def _reduce_58(val, _values)
                    struct(:USE, :endpoint => val[1])
              
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 251)
+module_eval(<<'.,.,', 'sdb-parser.y', 303)
   def _reduce_59(val, _values)
                     struct(:DESCRIBE, :domain => val[1])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 255)
+module_eval(<<'.,.,', 'sdb-parser.y', 307)
   def _reduce_60(val, _values)
                     struct(:DESCRIBE, :domain => val[1])
               
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 259)
+module_eval(<<'.,.,', 'sdb-parser.y', 311)
   def _reduce_61(val, _values)
                     script = val[0].sub(/\A\s*\|\s*/, '')
                 struct(:RUBY, :script => script)
@@ -798,7 +850,7 @@ module_eval(<<'.,.,', 'sdb-parser.y', 259)
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 264)
+module_eval(<<'.,.,', 'sdb-parser.y', 316)
   def _reduce_62(val, _values)
                     script = val[0].sub(/\A\s*!\s*/, '')
                 struct(:EXEC, :script => script)
@@ -806,28 +858,28 @@ module_eval(<<'.,.,', 'sdb-parser.y', 264)
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 270)
+module_eval(<<'.,.,', 'sdb-parser.y', 322)
   def _reduce_63(val, _values)
                          [val[0]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 274)
+module_eval(<<'.,.,', 'sdb-parser.y', 326)
   def _reduce_64(val, _values)
                          val[0] + [val[2]]
                    
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 279)
+module_eval(<<'.,.,', 'sdb-parser.y', 331)
   def _reduce_65(val, _values)
                      [val[0]]
                
   end
 .,.,
 
-module_eval(<<'.,.,', 'sdb-parser.y', 283)
+module_eval(<<'.,.,', 'sdb-parser.y', 335)
   def _reduce_66(val, _values)
                      [val[0], val[2]].flatten
                
