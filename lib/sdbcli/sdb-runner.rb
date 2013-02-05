@@ -207,6 +207,10 @@ module SimpleDB
         nil
       when :DESCRIBE
         @driver.describe(parsed.domain)
+      when :RUBY
+        eval(parsed.script.strip)
+      when :EXEC
+        `#{parsed.script.strip}`
       else
         raise 'must not happen'
       end

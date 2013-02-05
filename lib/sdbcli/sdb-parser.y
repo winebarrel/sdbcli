@@ -16,6 +16,8 @@ rule
        | show_stmt
        | use_stmt
        | desc_stmt
+       | ruby_stmt
+       | exec_stmt
        | error
          {
            @stmt_with_expr
@@ -253,6 +255,16 @@ rule
               {
                 struct(:DESCRIBE, :domain => val[1])
               }
+  ruby_stmt : RUBY
+              {
+                script = val[0].sub(/\A\s*\|\s*/, '')
+                struct(:RUBY, :script => script)
+              }
+  exec_stmt : EXEC
+              {
+                script = val[0].sub(/\A\s*!\s*/, '')
+                struct(:EXEC, :script => script)
+              }
 
   identifier_list: IDENTIFIER
                    {
@@ -375,6 +387,10 @@ def scan
       yield [tok, tok]
     elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
       yield [:IDENTIFIER, tok]
+    elsif (tok = @ss.scan /\|/i)
+      yield [:RUBY, @ss.scan(/.*/)]
+    elsif (tok = @ss.scan /!/i)
+      yield [:EXEC, @ss.scan(/.*/)]
     else
       raise Racc::ParseError, ('parse error on value "%s"' % @ss.rest.inspect)
     end
