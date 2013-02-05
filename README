@@ -188,3 +188,15 @@ If '-' is specified as a file name, the input/output of data will become a stand
   # 6 rows in set
 
 'sum' method and 'avg' method are added to Array class.
+
+== Exec ruby or shell command
+
+  ap-northeast-1> | (1 + 1).to_f;
+  --- 2.0
+  
+  ap-northeast-1> ! ls;
+  --- |
+  README
+  bin
+  lib
+  sdbcli.gemspec
