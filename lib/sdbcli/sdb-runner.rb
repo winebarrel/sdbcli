@@ -168,6 +168,48 @@ module SimpleDB
               end
             end
           end
+
+          def items.group_by(name, &block)
+            item_h = {}
+
+            self.each do |item|
+              key = item[1][name.to_s]
+
+              unless item_h[key]
+                item_list = []
+
+                def item_list.method_missing(method_name)
+                  case method_name.to_s
+                  when /itemName/i
+                    self.map {|i| i[0] }
+                  else
+                    self.map {|i| i[1][method_name.to_s] }
+                  end
+                end
+
+                item_h[key] = item_list
+              end
+
+              item_h[key] << item
+            end
+
+            if block
+              old_item_h = item_h
+              item_h = {}
+
+              old_item_h.each do |key, item_list|
+                if block.arity == 2
+                  new_item_list = block.call(item_list, key)
+                else
+                  new_item_list = block.call(item_list)
+                end
+
+                item_h[key] = new_item_list
+              end
+            end
+
+            item_h
+          end
         end
 
         if parsed.ruby
