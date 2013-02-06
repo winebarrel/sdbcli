@@ -235,6 +235,11 @@ Save to file
   3982
   3988
   3976
+  
+  ap-northeast-1> select * from employees limit 3 | first_name._('data.txt');
+  ap-northeast-1> ! cat data.txt;
+  --- |
+  ["Hiroyasu", "Jasminko", "Claudi"]
 
 Group By (Aggregate)
 --------------------
