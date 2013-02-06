@@ -114,7 +114,7 @@ Example
   .consistent (true|false)?  displays ConsistentRead parameter or changes it
   .iteratable (true|false)?  displays iteratable option or changes it
                              all results are displayed if true
-  .timeout    SECOND         displays a timeout second or changes it
+  .timeout    SECOND?        displays a timeout second or changes it
   .version                   displays a version
   
   ap-northeast-1> select * from test;
