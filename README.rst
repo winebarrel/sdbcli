@@ -225,6 +225,16 @@ Save to file
   --- |
   [["100000", {"first_name"=>"Hiroyasu", "hire_date"=>"1991-07-02", "birth_date"=>"1956-01-11", "last_name"=>"Emden"}], ["100001", {"first_name"=>"Jasminko", "hire_date"=>"1994-12-25", "birth_date"=>"1953-02-07", "last_name"=>"Antonakopoulos"}], ["100002", {"first_name"=>"Claudi", "hire_date"=>"1988-02-20", "birth_date"=>"1957-03-04", "last_name"=>"Kolinko"}]]
   [1991, 1994, 1988]
+  
+  ap-northeast-1> select * from employees limit 3 | hire_date.to_i.__('data.txt') {|i| i.map {|j| j * 2 } };
+  ap-northeast-1> ! cat data.txt;
+  --- |
+  [["100000", {"first_name"=>"Hiroyasu", "hire_date"=>"1991-07-02", "birth_date"=>"1956-01-11", "last_name"=>"Emden"}], ["100001", {"first_name"=>"Jasminko", "hire_date"=>"1994-12-25", "birth_date"=>"1953-02-07", "last_name"=>"Antonakopoulos"}], ["100002", {"first_name"=>"Claudi", "hire_date"=>"1988-02-20", "birth_date"=>"1957-03-04", "last_name"=>"Kolinko"}]]
+  [0, 0, 0]
+  [1991, 1994, 1988]
+  3982
+  3988
+  3976
 
 Group By (Aggregate)
 --------------------
@@ -247,6 +257,27 @@ Group By (Aggregate)
   host3: 300.9525
   host4: 302.1675
   host5: 301.62
+
+Use variables
+-------------
+::
+
+  ap-northeast-1> select * from employees limit 3 | $list1 = self;
+  ---
+  - ["100000", {first_name: Hiroyasu, hire_date: "1991-07-02", birth_date: "1956-01-11", last_name: Emden}]
+  - ["100001", {first_name: Jasminko, hire_date: "1994-12-25", birth_date: "1953-02-07", last_name: Antonakopoulos}]
+  - ["100002", {first_name: Claudi, hire_date: "1988-02-20", birth_date: "1957-03-04", last_name: Kolinko}]
+  # 3 rows in set
+  
+  ap-northeast-1> next | $list2 = self;
+  ---
+  - ["100003", {first_name: Marsja, hire_date: "1987-08-26", birth_date: "1959-08-30", last_name: Trogemann}]
+  - ["100004", {first_name: Avishai, hire_date: "1986-01-03", birth_date: "1960-04-16", last_name: Nitsch}]
+  - ["100005", {first_name: Anneke, hire_date: "1988-10-22", birth_date: "1958-03-09", last_name: Foong}]
+  # 3 rows in set
+  
+  ap-northeast-1> | ($list1 + $list2).length;
+  --- 6
 
 Exec ruby or shell command
 --------------------------
