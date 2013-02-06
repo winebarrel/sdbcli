@@ -141,6 +141,15 @@ see http://docs.amazonwebservices.com/AmazonSimpleDB/latest/DeveloperGuide/Quoti
   - [itemname1, {attr1: val1, attr2: val2}]
   - [itemname2, {attr1: val1, attr2: val2}]
 
+== Extraction of all records
+
+  ap-northeast-1> .i true
+  ap-northeast-1> select * from employees limit 2500 ! wc -l;
+  --- |
+  300024
+
+*Extraction of all records requires time very much.*
+
 == Import/Export
 
   shell> sdbcli -f json  --export=employees,employees.json
