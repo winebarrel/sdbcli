@@ -99,6 +99,9 @@ Example
     displays a present page number or displays a result of the specified page
     (PAGE statement is published after SELECT statement)
   
+  TAIL domain_name
+    displays a end of a domain
+  
   DESC[RIBE] domain_name
     displays information about the domain
   
