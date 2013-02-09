@@ -18,6 +18,7 @@ rule
        | desc_stmt
        | ruby_stmt
        | exec_stmt
+       | tail_stmt
        | error
          {
            @stmt_with_expr
@@ -282,6 +283,27 @@ rule
                 struct(:PAGE, :page => page, :script => script, :script_type => script_type)
               }
 
+  tail_stmt : TAIL
+              {
+                domain_name = nil
+                script = nil
+                script_type = nil
+
+                case val[0]
+                when /\s*\|\s*/
+                  domain_name, script = val[0].split(/\s*\|\s*/, 2)
+                  script_type = :ruby
+                when /\s*!\s*/
+                  domain_name, script = val[0].split(/\s*\!\s*/, 2)
+                  script_type = :shell
+                else
+                  domain_name = val[0]
+                end
+
+                domain_name = domain_name.split(/\b/, 2).last.strip
+                struct(:TAIL, :domain => domain_name, :script => script, :script_type => script_type)
+              }
+
   drop_stmt : DROP DOMAIN IDENTIFIER
               {
                 struct(:DROP, :domain => val[2])
@@ -295,10 +317,12 @@ rule
               {
                 struct(:SHOW, :operand => :regions)
               }
+
   use_stmt : USE IDENTIFIER
              {
                struct(:USE, :endpoint => val[1])
              }
+
   desc_stmt : DESC IDENTIFIER
               {
                 struct(:DESCRIBE, :domain => val[1])
@@ -307,11 +331,13 @@ rule
               {
                 struct(:DESCRIBE, :domain => val[1])
               }
+
   ruby_stmt : RUBY
               {
                 script = val[0].sub(/\A\s*\|\s*/, '')
                 struct(:RUBY, :script => script)
               }
+
   exec_stmt : EXEC
               {
                 script = val[0].sub(/\A\s*!\s*/, '')
@@ -425,6 +451,8 @@ def scan
       yield [:PREV, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /PAGE(\s+-?\d+)?/i)
       yield [:PAGE, tok + @ss.scan(/(\s*[|!]\s*.*)?/)]
+    elsif (tok = @ss.scan /TAIL\b\s*[^\s]+/i)
+      yield [:TAIL, tok + @ss.scan(/(\s*[|!]\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
     elsif (tok = @ss.scan /`([^`]|``)*`/)

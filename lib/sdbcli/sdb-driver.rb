@@ -169,6 +169,11 @@ module SimpleDB
       return items
     end
 
+    def tail(domain_name, consistent = false)
+      @select_expr = "SELECT * FROM #{domain_name}"
+      page_to(-1, consistent)
+    end
+
     def page_to(page, consistent = false)
       if page.zero?
         raise SimpleDB::Error, "Invalid page number: #{page}"
