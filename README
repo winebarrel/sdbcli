@@ -173,6 +173,21 @@ see http://docs.amazonwebservices.com/AmazonSimpleDB/latest/DeveloperGuide/Quoti
   - ["100026", {birth_date: "1952-12-15", last_name: Demos, hire_date: "1997-10-04", first_name: Lalit}]
   - ["100027", {birth_date: "1962-01-16", last_name: Coullard, hire_date: "1987-05-09", first_name: Ayakannu}]
   # 3 rows in set
+  
+  ap-northeast-1> page -1;
+  ---
+  - ["99997", {first_name: Mack, hire_date: "1995-01-08", birth_date: "1963-04-30", last_name: Morris}]
+  - ["99998", {first_name: Parto, hire_date: "1995-03-03", birth_date: "1961-10-31", last_name: Lally}]
+  - ["99999", {first_name: Gila, hire_date: "1992-04-20", birth_date: "1959-10-09", last_name: Lammel}]
+  # 3 rows in set
+  
+  ap-northeast-1> tail employees;
+  ---
+  - ["99976", {first_name: Toshiko, hire_date: "1997-12-24", birth_date: "1964-11-18", last_name: East man}]
+  - ["99977", {first_name: Yurij, hire_date: "1985-06-16", birth_date: "1960-09-18", last_name: Fujisa wa}]
+  - ["99978", {first_name: Adamantios, hire_date: "1993-06-25", birth_date: "1956-12-25", last_name: T agansky}]
+  - ["99979", {first_name: Padma, hire_date: "1985-10-24", birth_date: "1957-12-09", last_name: Bage}]
+  ...
 
 == Extraction of all records
 
