@@ -94,7 +94,7 @@ def scan
       yield [:CURRENT, @ss.scan(/\s*[|!]\s*.*/)]
     elsif (tok = @ss.scan /P(REV)?\b/i)
       yield [:PREV, @ss.scan(/\s*[|!]\s*.*/)]
-    elsif (tok = @ss.scan /PAGE(\s+\d+)?/i)
+    elsif (tok = @ss.scan /PAGE(\s+-?\d+)?/i)
       yield [:PAGE, tok + @ss.scan(/(\s*[|!]\s*.*)?/)]
     elsif (tok = @ss.scan /NULL\b/i)
       yield [:NULL, nil]
@@ -683,7 +683,7 @@ module_eval(<<'.,.,', 'sdb-parser.y', 177)
   def _reduce_49(val, _values)
                       query = ''
                   script = nil
-		  script_type = nil
+                  script_type = nil
 
                   ss = StringScanner.new(val[0])
 

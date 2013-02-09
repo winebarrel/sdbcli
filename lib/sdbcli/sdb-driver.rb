@@ -170,12 +170,18 @@ module SimpleDB
     end
 
     def page_to(page, consistent = false)
-      if page < 1
+      if page.zero?
         raise SimpleDB::Error, "Invalid page number: #{page}"
       end
 
       unless @select_expr
         return []
+      end
+
+      if page < 0
+        n = page_num
+        return [] unless n
+        page =  n + 1 + page
       end
 
       ss = StringScanner.new(@select_expr.dup)
@@ -188,6 +194,7 @@ module SimpleDB
         elsif ss.scan(/"(?:[^"]|"")*"/) #"
         elsif (tok = ss.scan /LIMIT\s+\d\b/i)
           limit = tok.split(/\s+/).last.to_i
+          break
         elsif ss.scan(/./)
         end
       end
@@ -271,6 +278,47 @@ module SimpleDB
 
         @client.batch_delete_attributes(domain_name, params)
       end
+    end
+
+    def page_num
+      return nil unless @select_expr
+
+      ss = StringScanner.new(@select_expr)
+      domain_name = nil
+
+      until ss.eos?
+        if ss.scan(/[^F`'"|!]+/i) #'
+        elsif ss.scan(/`(?:[^`]|``)*`/)
+        elsif ss.scan(/'(?:[^']|'')*'/) #'
+        elsif ss.scan(/"(?:[^"]|"")*"/) #"
+        elsif (tok = ss.scan /FROM\b\s*[^\s]+/i)
+          domain_name = tok.split(/\b/, 2).last
+          break
+        elsif ss.scan(/./)
+        end
+      end
+
+      return nil unless domain_name
+      domain_name.strip!.gsub!(/`([^`]+)`/, '\1')
+
+      item_count = describe(domain_name)['ItemCount'].to_f
+
+      ss = StringScanner.new(@select_expr)
+      limit = 100
+
+      until ss.eos?
+        if ss.scan(/[^`'"L]+/i) #'
+        elsif ss.scan( /`(?:[^`]|``)*`/)
+        elsif ss.scan(/'(?:[^']|'')*'/) #'
+        elsif ss.scan(/"(?:[^"]|"")*"/) #"
+        elsif (tok = ss.scan /LIMIT\s+\d\b/i)
+          limit = tok.split(/\s+/).last.to_i
+          break
+        elsif ss.scan(/./)
+        end
+      end
+
+      return (item_count / limit).ceil
     end
 
     def describe(domain_name)
