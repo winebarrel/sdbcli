@@ -80,7 +80,7 @@ def execute(src, show_rows = false)
   until ss.eos?
     if (tok = ss.scan %r{[^-.`'";\\/#]+}) #'
       buf << tok
-      script = (tok =~ /[|!]/)
+      script = true if tok =~ /[|!]/
     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
       buf << tok
     elsif (tok = ss.scan /'(?:[^']|'')*'/) #'
@@ -175,7 +175,6 @@ def execute(src, show_rows = false)
         puts str
       end
     elsif (tok = ss.scan /[-.]/)
-p script
       if script
         buf << tok
       else
@@ -187,7 +186,7 @@ p script
       end
     elsif (tok = ss.scan /./)
       buf << tok
-      script = (tok =~ /[|!]/)
+      script = true if tok =~ /[|!]/
     end
   end
 
