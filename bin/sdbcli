@@ -75,10 +75,12 @@ end
 def execute(src, show_rows = false)
   ss = StringScanner.new(src.dup)
   buf = ''
+  script = false
 
   until ss.eos?
     if (tok = ss.scan %r{[^-.`'";\\/#]+}) #'
       buf << tok
+      script = (tok =~ /[|!]/)
     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
       buf << tok
     elsif (tok = ss.scan /'(?:[^']|'')*'/) #'
@@ -97,6 +99,7 @@ def execute(src, show_rows = false)
       src.replace(ss.rest)
       query = buf
       buf = ''
+      script = false
 
       if tok == '\G'
         inline = false
@@ -172,12 +175,19 @@ def execute(src, show_rows = false)
         puts str
       end
     elsif (tok = ss.scan /[-.]/)
-      output_error 'You must quote attributes and domain names that contain characters other than letters, numbers, underscores (_), or dollar symbols ($) with the backtick (`)'
-      ss.scan_until(/(?:;|\\G|\Z)/)
-      src.replace(ss.rest)
-      buf = ''
+p script
+      if script
+        buf << tok
+      else
+        output_error 'You must quote attributes and domain names that contain characters other than letters, numbers, underscores (_), or dollar symbols ($) with the backtick (`)'
+        ss.scan_until(/(?:;|\\G|\Z)/)
+        src.replace(ss.rest)
+        buf = ''
+        script = false
+      end
     elsif (tok = ss.scan /./)
       buf << tok
+      script = (tok =~ /[|!]/)
     end
   end
 
