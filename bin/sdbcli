@@ -77,7 +77,7 @@ def execute(src, show_rows = false)
   buf = ''
 
   until ss.eos?
-    if (tok = ss.scan %r{[^-`'";\\/#]+}) #'
+    if (tok = ss.scan %r{[^-.`'";\\/#]+}) #'
       buf << tok
     elsif (tok = ss.scan /`(?:[^`]|``)*`/)
       buf << tok
@@ -171,6 +171,11 @@ def execute(src, show_rows = false)
         str << "\n"
         puts str
       end
+    elsif (tok = ss.scan /[-.]/)
+      output_error 'You must quote attributes and domain names that contain characters other than letters, numbers, underscores (_), or dollar symbols ($) with the backtick (`)'
+      ss.scan_until(/(?:;|\\G|\Z)/)
+      src.replace(ss.rest)
+      buf = ''
     elsif (tok = ss.scan /./)
       buf << tok
     end

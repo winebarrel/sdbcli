@@ -465,7 +465,7 @@ def scan
       yield [:NUMBER, tok]
     elsif (tok = @ss.scan /[,\(\)\*]/)
       yield [tok, tok]
-    elsif (tok = @ss.scan /[a-z_$][-0-9a-z_$.]*\b/i)
+    elsif (tok = @ss.scan /[a-z_$][0-9a-z_$]*\b/i)
       yield [:IDENTIFIER, tok]
     elsif (tok = @ss.scan /\|/i)
       yield [:RUBY, @ss.scan(/.*/)]
