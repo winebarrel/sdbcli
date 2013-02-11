@@ -159,11 +159,11 @@ rule
                 {
                   @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => '')
                 }
-              | DELETE delete_attr_list FROM WHERE
+              | DELETE delete_attr_list FROM IDENTIFIER WHERE
                 {
                   @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE ')
                 }
-              | DELETE delete_attr_list FROM WHERE ITEMNAME
+              | DELETE delete_attr_list FROM IDENTIFIER WHERE ITEMNAME
                 {
                   @stmt_with_expr = struct(:DELETE_WITH_EXPR, :domain => val[3], :attrs => val[1],  :expr => 'WHERE itemName')
                 }
